@@ -14,7 +14,6 @@ export const IncomeSection: React.FC<IncomeSectionProps> = ({ income, updateInco
     const newItem: IncomeItem = {
       id: Date.now().toString(),
       description: 'New Income',
-      expected: 0,
       amount: 0
     };
     updateIncome([...income, newItem]);
@@ -30,59 +29,56 @@ export const IncomeSection: React.FC<IncomeSectionProps> = ({ income, updateInco
     ));
   };
 
-  const totalExpected = income.reduce((sum, item) => sum + item.expected, 0);
   const totalAmount = income.reduce((sum, item) => sum + item.amount, 0);
 
   return (
-    <div className="glass rounded-2xl p-6 animate-slide-in bg-gradient-to-br from-cyan-50/50 to-teal-50/50">
-      <div className="flex items-center justify-between mb-4">
+    <div className="glass rounded-2xl p-6 animate-slideUp">
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <DollarSign className="text-teal-500" size={20} />
-          <h3 className="text-lg font-bold text-gray-700 tracking-wide">INCOME</h3>
+          <DollarSign className="text-emerald-600" size={24} />
+          <h2 className="text-2xl font-bold text-gray-800">INCOME</h2>
         </div>
+        <button
+          onClick={addItem}
+          className="glass-hover px-4 py-2 rounded-xl text-gray-800 font-medium flex items-center gap-2 transition-all hover:scale-105"
+        >
+          <Plus size={18} />
+          Add
+        </button>
       </div>
       
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full">
           <thead>
-            <tr className="border-b-2 border-white/40">
-              <th className="text-left py-2 font-bold text-gray-700">Description</th>
-              <th className="text-right py-2 font-bold text-gray-700">Expected</th>
-              <th className="text-right py-2 font-bold text-gray-700">Amount</th>
-              <th className="w-10"></th>
+            <tr className="border-b-2 border-gray-300">
+              <th className="text-left py-3 px-3 font-semibold text-gray-700">Description</th>
+              <th className="text-left py-3 px-3 font-semibold text-gray-700 w-32">Amount</th>
+              <th className="w-10 px-2"></th>
             </tr>
           </thead>
           <tbody>
             {income.map(item => (
-              <tr key={item.id} className="border-b border-white/20 hover:bg-white/10">
-                <td className="py-2">
+              <tr key={item.id} className="border-b border-gray-300 hover:bg-white/5 transition-colors">
+                <td className="py-3 px-3">
                   <input
                     type="text"
                     value={item.description}
                     onChange={(e) => updateItem(item.id, 'description', e.target.value)}
-                    className="w-full bg-transparent focus:outline-none focus:bg-white/20 px-2 py-1 rounded"
+                    className="w-full bg-white/40 border border-gray-300 rounded-lg px-3 py-2 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-400"
                   />
                 </td>
-                <td className="py-2 text-right">
-                  <input
-                    type="number"
-                    value={item.expected}
-                    onChange={(e) => updateItem(item.id, 'expected', parseFloat(e.target.value) || 0)}
-                    className="w-full bg-transparent focus:outline-none focus:bg-white/20 px-2 py-1 rounded text-right"
-                  />
-                </td>
-                <td className="py-2 text-right">
+                <td className="py-3 px-3 w-32">
                   <input
                     type="number"
                     value={item.amount}
                     onChange={(e) => updateItem(item.id, 'amount', parseFloat(e.target.value) || 0)}
-                    className="w-full bg-transparent focus:outline-none focus:bg-white/20 px-2 py-1 rounded text-right"
+                    className="w-32 bg-white/40 border border-gray-300 rounded-lg px-2 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-400"
                   />
                 </td>
-                <td className="py-2 text-center">
+                <td className="py-3 px-2 text-center">
                   <button
                     onClick={() => deleteItem(item.id)}
-                    className="text-red-400 hover:text-red-600 p-1"
+                    className="text-red-300 hover:text-red-200 p-2 hover:bg-red-500/20 rounded-lg transition-all"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -93,22 +89,10 @@ export const IncomeSection: React.FC<IncomeSectionProps> = ({ income, updateInco
         </table>
       </div>
 
-      <div className="flex justify-between items-center mt-4 glass-strong p-3 rounded-lg">
-        <span className="font-bold text-gray-800">Totals</span>
-        <div className="flex gap-6">
-          <span className="font-bold gradient-text">{formatCurrency(totalExpected, currency)}</span>
-          <span className="font-bold gradient-text">{formatCurrency(totalAmount, currency)}</span>
-          <span className="w-10"></span>
-        </div>
+      <div className="flex justify-between items-center mt-6 glass-strong p-4 rounded-xl">
+        <span className="font-bold text-gray-800 text-lg">Total</span>
+        <span className="font-bold text-emerald-600 text-xl">{formatCurrency(totalAmount, currency)}</span>
       </div>
-
-      <button
-        onClick={addItem}
-        className="w-full mt-4 glass glass-hover rounded-lg py-3 flex items-center justify-center gap-2 text-gray-700 font-semibold border-2 border-dashed border-white/40"
-      >
-        <Plus size={20} />
-        Add Income
-      </button>
     </div>
   );
 };

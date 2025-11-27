@@ -10,18 +10,33 @@
 
 @layer utilities {
   .glass {
-    @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-xl;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
   }
   
   .glass-strong {
-    @apply bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
   }
   
   .glass-hover {
-    @apply hover:bg-white/20 hover:shadow-2xl transition-all duration-300;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    transition: all 0.3s ease;
+  }
+  
+  .glass-hover:hover {
+    background: rgba(255, 255, 255, 0.65);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.15);
   }
   
   .gradient-text {
-    @apply bg-gradient-to-r from-rose-500 to-purple-600 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-rose-600 to-purple-700 bg-clip-text text-transparent;
   }
 }

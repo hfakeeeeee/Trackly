@@ -21,16 +21,16 @@ export const useBudgetData = () => {
     setData(prev => ({ ...prev, bills }));
   };
 
-  const updateExpenses = (expenses: BudgetData['expenses']) => {
-    setData(prev => ({ ...prev, expenses }));
-  };
-
   const updateSavings = (savings: BudgetData['savings']) => {
     setData(prev => ({ ...prev, savings }));
   };
 
   const updateExpenseTracker = (expenseTracker: BudgetData['expenseTracker']) => {
     setData(prev => ({ ...prev, expenseTracker }));
+  };
+
+  const updateCategories = (categories: BudgetData['categories']) => {
+    setData(prev => ({ ...prev, categories }));
   };
 
   const updateSettings = (settings: Partial<BudgetData['settings']>) => {
@@ -42,9 +42,9 @@ export const useBudgetData = () => {
     updateIncome,
     updateDebts,
     updateBills,
-    updateExpenses,
     updateSavings,
     updateExpenseTracker,
+    updateCategories,
     updateSettings
   };
 };

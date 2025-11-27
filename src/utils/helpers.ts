@@ -17,23 +17,16 @@ export const getInitialData = (): BudgetData => {
       {
         id: '1',
         description: 'Lương tháng 10',
-        expected: 10000000,
         amount: 10000000
       }
     ],
     debts: [],
     bills: [
-      { id: '1', checked: false, description: 'Tiền điện', dueDate: '', budget: 0, actual: 0 },
-      { id: '2', checked: false, description: 'Tiền nước', dueDate: '', budget: 0, actual: 0 }
-    ],
-    expenses: [
-      { id: '1', category: 'Personal Care', budget: 0, actual: 200000 },
-      { id: '2', category: 'Travel', budget: 0, actual: 0 },
-      { id: '3', category: 'Gift', budget: 0, actual: 0 },
-      { id: '4', category: 'Em', budget: 0, actual: 0 }
+      { id: '1', checked: false, description: 'Tiền điện', dueDate: '', amount: 0 },
+      { id: '2', checked: false, description: 'Tiền nước', dueDate: '', amount: 0 }
     ],
     savings: [
-      { id: '1', description: 'Tiết kiệm', budget: 3000000, actual: 3000000 }
+      { id: '1', description: 'Tiết kiệm', amount: 3000000 }
     ],
     expenseTracker: [
       { id: '1', date: 'Wed, Nov 5', amount: 300000, description: 'Tiền ăn tiệc anh An', category: 'Entertainment' },
@@ -49,11 +42,22 @@ export const getInitialData = (): BudgetData => {
       { id: '11', date: 'Fri, Nov 7', amount: 50000, description: 'Ăn tối', category: 'Food' },
       { id: '12', date: 'Sat, Nov 8', amount: 283000, description: 'Mỹ phẩm cho Em', category: 'Em' }
     ],
+    categories: [
+      { id: '1', name: 'Entertainment', color: '#f59e0b' },
+      { id: '2', name: 'Food', color: '#10b981' },
+      { id: '3', name: 'Em', color: '#ec4899' },
+      { id: '4', name: 'Education', color: '#3b82f6' },
+      { id: '5', name: 'Fuel', color: '#8b5cf6' },
+      { id: '6', name: 'Personal Care', color: '#06b6d4' },
+      { id: '7', name: 'Tiết kiệm', color: '#14b8a6' },
+      { id: '8', name: 'Other', color: '#6b7280' }
+    ],
     settings: {
       currency: '₫',
       startDate: '2025-11-05',
       endDate: '2025-12-05',
-      startBalance: 0
+      startBalance: 0,
+      darkMode: false
     }
   };
 };
@@ -66,8 +70,8 @@ export const saveData = (data: BudgetData) => {
   }
 };
 
-export const formatCurrency = (amount: number, currency: string = '₫'): string => {
-  return `${currency} ${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+export const formatCurrency = (amount: number, _currency?: string): string => {
+  return `${amount.toLocaleString('vi-VN')}`;
 };
 
 export const parseMoneyValue = (text: string): number => {

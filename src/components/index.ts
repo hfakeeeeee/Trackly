@@ -1,10 +1,9 @@
 export { Header } from './Header';
 export { OverviewSection } from './OverviewSection';
-export { CashFlowSection } from './CashFlowSection';
 export { IncomeSection } from './IncomeSection';
 export { DebtSection } from './DebtSection';
 export { BillsSection } from './BillsSection';
-export { ExpensesSection } from './ExpensesSection';
 export { SavingsSection } from './SavingsSection';
 export { ExpenseTrackerSection } from './ExpenseTrackerSection';
-export { BudgetChart, CategoryPieChart } from './Charts';
+export { CategorySection } from './CategorySection';
+export { CategoryPieChart } from './Charts';
