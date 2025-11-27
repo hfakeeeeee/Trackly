@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gradient-to-br from-rose-100 via-purple-50 to-cyan-100 min-h-screen font-sans antialiased;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-xl;
+  }
+  
+  .glass-strong {
+    @apply bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl;
+  }
+  
+  .glass-hover {
+    @apply hover:bg-white/20 hover:shadow-2xl transition-all duration-300;
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-rose-500 to-purple-600 bg-clip-text text-transparent;
+  }
+}
