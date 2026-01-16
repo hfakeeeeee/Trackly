@@ -3,11 +3,12 @@ import { useApp } from '../AppContext';
 import { format } from 'date-fns';
 
 export const Header: React.FC = () => {
-  const { periodSettings, getTotalIncome, getTotalSavings, getRemainingAmount } = useApp();
+  const { periodSettings, getTotalIncome, getTotalSavings, getTotalExpenses, getRemainingAmount } = useApp();
 
   const currentMonth = format(new Date(periodSettings.startDate), 'MMMM yyyy');
   const totalIncome = getTotalIncome();
   const totalSavings = getTotalSavings();
+  const totalExpenses = getTotalExpenses();
   const remainingAmount = getRemainingAmount();
 
   const formatCurrency = (amount: number) => {
@@ -21,7 +22,7 @@ export const Header: React.FC = () => {
     <header className="bg-gradient-to-r from-primary-600 to-primary-800 text-white shadow-lg">
       <div className="container mx-auto px-6 py-8">
         <h1 className="text-3xl font-bold mb-6">Trackly - {currentMonth}</h1>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
             <p className="text-sm opacity-90 mb-1">Total Income</p>
             <p className="text-2xl font-bold">{formatCurrency(totalIncome)}</p>
@@ -29,6 +30,10 @@ export const Header: React.FC = () => {
           <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
             <p className="text-sm opacity-90 mb-1">Total Savings</p>
             <p className="text-2xl font-bold">{formatCurrency(totalSavings)}</p>
+          </div>
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+            <p className="text-sm opacity-90 mb-1">Total Money Spent</p>
+            <p className="text-2xl font-bold">{formatCurrency(totalExpenses)}</p>
           </div>
           <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
             <p className="text-sm opacity-90 mb-1">Remaining Amount</p>

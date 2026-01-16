@@ -8,6 +8,7 @@ import { Savings } from './components/Savings';
 import { Bills } from './components/Bills';
 import { ExpenseTracker } from './components/ExpenseTracker';
 import { ExpenseChart } from './components/ExpenseChart';
+import { FinancialOverviewChart } from './components/FinancialOverviewChart';
 
 function App() {
   return (
@@ -15,20 +16,27 @@ function App() {
       <div className="min-h-screen bg-gray-100">
         <Header />
         <main className="container mx-auto px-6 py-8">
-          <Overview />
-          
+          {/* Row 1: Overview + Financial Overview Chart */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <Overview />
+            <FinancialOverviewChart />
+          </div>
+          
+          {/* Row 2: Income + Bills + Debt */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             <Income />
-            <Savings />
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <Debt />
             <Bills />
+            <Debt />
           </div>
           
+          {/* Row 3: Savings + Expense Distribution */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <Savings />
+            <ExpenseChart />
+          </div>
+          
+          {/* Row 4: Expense Tracker (Full Width) */}
           <ExpenseTracker />
-          <ExpenseChart />
         </main>
         
         <footer className="bg-white border-t border-gray-200 mt-12">

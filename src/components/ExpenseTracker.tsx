@@ -153,9 +153,9 @@ export const ExpenseTracker: React.FC = () => {
             <h3 className="text-xl font-semibold text-gray-800">Categories</h3>
             <button
               onClick={() => setShowAddCategory(!showAddCategory)}
-              className="text-primary-600 hover:text-primary-700 font-medium text-sm"
+              className="bg-primary-600 text-white px-3 py-1 rounded-md hover:bg-primary-700 transition-colors text-sm font-medium"
             >
-              {showAddCategory ? 'Cancel' : '+ Add'}
+              {showAddCategory ? 'Cancel' : '+ Add Category'}
             </button>
           </div>
 
