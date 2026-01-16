@@ -4,16 +4,22 @@ import { AppState, IncomeItem, DebtItem, SavingsItem, BillItem, ExpenseItem, Cat
 interface AppContextType extends AppState {
   addIncome: (item: Omit<IncomeItem, 'id'>) => void;
   removeIncome: (id: string) => void;
+  updateIncome: (id: string, item: Partial<Omit<IncomeItem, 'id'>>) => void;
   addDebt: (item: Omit<DebtItem, 'id'>) => void;
   removeDebt: (id: string) => void;
+  updateDebt: (id: string, item: Partial<Omit<DebtItem, 'id'>>) => void;
   addSavings: (item: Omit<SavingsItem, 'id'>) => void;
   removeSavings: (id: string) => void;
+  updateSavings: (id: string, item: Partial<Omit<SavingsItem, 'id'>>) => void;
   addBill: (item: Omit<BillItem, 'id'>) => void;
   removeBill: (id: string) => void;
+  updateBill: (id: string, item: Partial<Omit<BillItem, 'id'>>) => void;
   addExpense: (item: Omit<ExpenseItem, 'id'>) => void;
   removeExpense: (id: string) => void;
+  updateExpense: (id: string, item: Partial<Omit<ExpenseItem, 'id'>>) => void;
   addCategory: (name: string) => void;
   removeCategory: (id: string) => void;
+  updateCategory: (id: string, name: string) => void;
   updatePeriod: (startDate: string, endDate: string) => void;
   getTotalIncome: () => number;
   getTotalSavings: () => number;
@@ -78,6 +84,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }));
   };
 
+  const updateIncome = (id: string, item: Partial<Omit<IncomeItem, 'id'>>) => {
+    setState(prev => ({
+      ...prev,
+      income: prev.income.map(inc => inc.id === id ? { ...inc, ...item } : inc),
+    }));
+  };
+
   const addDebt = (item: Omit<DebtItem, 'id'>) => {
     setState(prev => ({
       ...prev,
@@ -89,6 +102,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setState(prev => ({
       ...prev,
       debts: prev.debts.filter(item => item.id !== id),
+    }));
+  };
+
+  const updateDebt = (id: string, item: Partial<Omit<DebtItem, 'id'>>) => {
+    setState(prev => ({
+      ...prev,
+      debts: prev.debts.map(debt => debt.id === id ? { ...debt, ...item } : debt),
     }));
   };
 
@@ -106,6 +126,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }));
   };
 
+  const updateSavings = (id: string, item: Partial<Omit<SavingsItem, 'id'>>) => {
+    setState(prev => ({
+      ...prev,
+      savings: prev.savings.map(sav => sav.id === id ? { ...sav, ...item } : sav),
+    }));
+  };
+
   const addBill = (item: Omit<BillItem, 'id'>) => {
     setState(prev => ({
       ...prev,
@@ -117,6 +144,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setState(prev => ({
       ...prev,
       bills: prev.bills.filter(item => item.id !== id),
+    }));
+  };
+
+  const updateBill = (id: string, item: Partial<Omit<BillItem, 'id'>>) => {
+    setState(prev => ({
+      ...prev,
+      bills: prev.bills.map(bill => bill.id === id ? { ...bill, ...item } : bill),
     }));
   };
 
@@ -158,6 +192,42 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     });
   };
 
+  const updateExpense = (id: string, item: Partial<Omit<ExpenseItem, 'id'>>) => {
+    setState(prev => {
+      const oldExpense = prev.expenses.find(e => e.id === id);
+      if (!oldExpense) return prev;
+
+      const updatedExpense = { ...oldExpense, ...item };
+      
+      // Update category totals
+      let updatedCategories = prev.categories;
+      
+      // If category changed or amount changed, update totals
+      if (item.category !== undefined || item.amount !== undefined) {
+        updatedCategories = prev.categories.map(cat => {
+          // Subtract old amount from old category
+          if (cat.name === oldExpense.category) {
+            const newTotal = Math.max(0, cat.total - oldExpense.amount);
+            return { ...cat, total: newTotal };
+          }
+          return cat;
+        }).map(cat => {
+          // Add new amount to new category
+          if (cat.name === updatedExpense.category) {
+            return { ...cat, total: cat.total + updatedExpense.amount };
+          }
+          return cat;
+        });
+      }
+
+      return {
+        ...prev,
+        expenses: prev.expenses.map(exp => exp.id === id ? updatedExpense : exp),
+        categories: updatedCategories,
+      };
+    });
+  };
+
   const addCategory = (name: string) => {
     setState(prev => ({
       ...prev,
@@ -169,6 +239,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setState(prev => ({
       ...prev,
       categories: prev.categories.filter(cat => cat.id !== id),
+    }));
+  };
+
+  const updateCategory = (id: string, name: string) => {
+    setState(prev => ({
+      ...prev,
+      categories: prev.categories.map(cat => cat.id === id ? { ...cat, name } : cat),
     }));
   };
 
@@ -201,16 +278,22 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         ...state,
         addIncome,
         removeIncome,
+        updateIncome,
         addDebt,
         removeDebt,
+        updateDebt,
         addSavings,
         removeSavings,
+        updateSavings,
         addBill,
         removeBill,
+        updateBill,
         addExpense,
         removeExpense,
+        updateExpense,
         addCategory,
         removeCategory,
+        updateCategory,
         updatePeriod,
         getTotalIncome,
         getTotalSavings,

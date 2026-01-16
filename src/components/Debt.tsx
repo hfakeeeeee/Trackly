@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { useApp } from '../AppContext';
+import { DebtItem } from '../types';
 
 export const Debt: React.FC = () => {
-  const { debts, addDebt, removeDebt } = useApp();
+  const { debts, addDebt, removeDebt, updateDebt } = useApp();
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editDescription, setEditDescription] = useState('');
+  const [editAmount, setEditAmount] = useState('');
+  const [editDate, setEditDate] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +34,31 @@ export const Debt: React.FC = () => {
   };
 
   const totalDebt = debts.reduce((sum, item) => sum + item.amount, 0);
+
+  const handleEdit = (item: DebtItem) => {
+    setEditingId(item.id);
+    setEditDescription(item.description);
+    setEditAmount(item.amount.toString());
+    setEditDate(item.date);
+  };
+
+  const handleUpdate = (id: string) => {
+    if (editDescription && editAmount && editDate) {
+      updateDebt(id, {
+        description: editDescription,
+        amount: parseFloat(editAmount),
+        date: editDate,
+      });
+      setEditingId(null);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditDescription('');
+    setEditAmount('');
+    setEditDate('');
+  };
 
   return (
     <section className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -90,19 +120,71 @@ export const Debt: React.FC = () => {
             ) : (
               debts.map((item) => (
                 <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-3 px-4">{item.description}</td>
-                  <td className="py-3 px-4 text-center">{item.date}</td>
-                  <td className="py-3 px-4 text-right font-medium text-red-600">
-                    {formatCurrency(item.amount)}
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    <button
-                      onClick={() => removeDebt(item.id)}
-                      className="text-red-600 hover:text-red-800 font-medium"
-                    >
-                      Delete
-                    </button>
-                  </td>
+                  {editingId === item.id ? (
+                    <>
+                      <td className="py-3 px-4">
+                        <input
+                          type="text"
+                          value={editDescription}
+                          onChange={(e) => setEditDescription(e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        />
+                      </td>
+                      <td className="py-3 px-4">
+                        <input
+                          type="date"
+                          value={editDate}
+                          onChange={(e) => setEditDate(e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        />
+                      </td>
+                      <td className="py-3 px-4">
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={editAmount}
+                          onChange={(e) => setEditAmount(e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded text-right focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        />
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <button
+                          onClick={() => handleUpdate(item.id)}
+                          className="text-green-600 hover:text-green-800 font-medium mr-2"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          className="text-gray-600 hover:text-gray-800 font-medium"
+                        >
+                          Cancel
+                        </button>
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="py-3 px-4">{item.description}</td>
+                      <td className="py-3 px-4 text-center">{item.date}</td>
+                      <td className="py-3 px-4 text-right font-medium text-red-600">
+                        {formatCurrency(item.amount)}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <button
+                          onClick={() => handleEdit(item)}
+                          className="text-blue-600 hover:text-blue-800 font-medium mr-2"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => removeDebt(item.id)}
+                          className="text-red-600 hover:text-red-800 font-medium"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </>
+                  )}
                 </tr>
               ))
             )}

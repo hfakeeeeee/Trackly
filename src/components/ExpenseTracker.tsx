@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
 import { useApp } from '../AppContext';
+import { ExpenseItem } from '../types';
 
 export const ExpenseTracker: React.FC = () => {
-  const { expenses, categories, addExpense, removeExpense } = useApp();
+  const { expenses, categories, addExpense, removeExpense, updateExpense } = useApp();
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editDate, setEditDate] = useState('');
+  const [editAmount, setEditAmount] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editCategory, setEditCategory] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +37,34 @@ export const ExpenseTracker: React.FC = () => {
   };
 
   const totalExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
+
+  const handleEdit = (item: ExpenseItem) => {
+    setEditingId(item.id);
+    setEditDate(item.date);
+    setEditAmount(item.amount.toString());
+    setEditDescription(item.description);
+    setEditCategory(item.category);
+  };
+
+  const handleUpdate = (id: string) => {
+    if (editDate && editAmount && editDescription && editCategory) {
+      updateExpense(id, {
+        date: editDate,
+        amount: parseFloat(editAmount),
+        description: editDescription,
+        category: editCategory,
+      });
+      setEditingId(null);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditDate('');
+    setEditAmount('');
+    setEditDescription('');
+    setEditCategory('');
+  };
 
   return (
     <section className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -107,24 +141,89 @@ export const ExpenseTracker: React.FC = () => {
             ) : (
               [...expenses].reverse().map((item) => (
                 <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-3 px-4">{item.date}</td>
-                  <td className="py-3 px-4">{item.description}</td>
-                  <td className="py-3 px-4">
-                    <span className="bg-primary-100 text-primary-700 px-2 py-1 rounded text-sm">
-                      {item.category}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-right font-medium text-purple-600">
-                    {formatCurrency(item.amount)}
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    <button
-                      onClick={() => removeExpense(item.id)}
-                      className="text-red-600 hover:text-red-800 font-medium"
-                    >
-                      Delete
-                    </button>
-                  </td>
+                  {editingId === item.id ? (
+                    <>
+                      <td className="py-3 px-4">
+                        <input
+                          type="date"
+                          value={editDate}
+                          onChange={(e) => setEditDate(e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        />
+                      </td>
+                      <td className="py-3 px-4">
+                        <input
+                          type="text"
+                          value={editDescription}
+                          onChange={(e) => setEditDescription(e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        />
+                      </td>
+                      <td className="py-3 px-4">
+                        <select
+                          value={editCategory}
+                          onChange={(e) => setEditCategory(e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        >
+                          {categories.map((cat) => (
+                            <option key={cat.id} value={cat.name}>
+                              {cat.name}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="py-3 px-4">
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={editAmount}
+                          onChange={(e) => setEditAmount(e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded text-right focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        />
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <button
+                          onClick={() => handleUpdate(item.id)}
+                          className="text-green-600 hover:text-green-800 font-medium mr-2"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          className="text-gray-600 hover:text-gray-800 font-medium"
+                        >
+                          Cancel
+                        </button>
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="py-3 px-4">{item.date}</td>
+                      <td className="py-3 px-4">{item.description}</td>
+                      <td className="py-3 px-4">
+                        <span className="bg-primary-100 text-primary-700 px-2 py-1 rounded text-sm">
+                          {item.category}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-right font-medium text-purple-600">
+                        {formatCurrency(item.amount)}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <button
+                          onClick={() => handleEdit(item)}
+                          className="text-blue-600 hover:text-blue-800 font-medium mr-2"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => removeExpense(item.id)}
+                          className="text-red-600 hover:text-red-800 font-medium"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </>
+                  )}
                 </tr>
               ))
             )}

@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { useApp } from '../AppContext';
+import { IncomeItem } from '../types';
 
 export const Income: React.FC = () => {
-  const { income, addIncome, removeIncome, getTotalIncome } = useApp();
+  const { income, addIncome, removeIncome, updateIncome, getTotalIncome } = useApp();
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editDescription, setEditDescription] = useState('');
+  const [editAmount, setEditAmount] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,6 +27,28 @@ export const Income: React.FC = () => {
       style: 'currency',
       currency: 'USD',
     }).format(amount);
+  };
+
+  const handleEdit = (item: IncomeItem) => {
+    setEditingId(item.id);
+    setEditDescription(item.description);
+    setEditAmount(item.amount.toString());
+  };
+
+  const handleUpdate = (id: string) => {
+    if (editDescription && editAmount) {
+      updateIncome(id, {
+        description: editDescription,
+        amount: parseFloat(editAmount),
+      });
+      setEditingId(null);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditDescription('');
+    setEditAmount('');
   };
 
   return (
@@ -78,18 +104,62 @@ export const Income: React.FC = () => {
             ) : (
               income.map((item) => (
                 <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="py-3 px-4">{item.description}</td>
-                  <td className="py-3 px-4 text-right font-medium text-green-600">
-                    {formatCurrency(item.amount)}
-                  </td>
-                  <td className="py-3 px-4 text-center">
-                    <button
-                      onClick={() => removeIncome(item.id)}
-                      className="text-red-600 hover:text-red-800 font-medium"
-                    >
-                      Delete
-                    </button>
-                  </td>
+                  {editingId === item.id ? (
+                    <>
+                      <td className="py-3 px-4">
+                        <input
+                          type="text"
+                          value={editDescription}
+                          onChange={(e) => setEditDescription(e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        />
+                      </td>
+                      <td className="py-3 px-4">
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={editAmount}
+                          onChange={(e) => setEditAmount(e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded text-right focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        />
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <button
+                          onClick={() => handleUpdate(item.id)}
+                          className="text-green-600 hover:text-green-800 font-medium mr-2"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          className="text-gray-600 hover:text-gray-800 font-medium"
+                        >
+                          Cancel
+                        </button>
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="py-3 px-4">{item.description}</td>
+                      <td className="py-3 px-4 text-right font-medium text-green-600">
+                        {formatCurrency(item.amount)}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <button
+                          onClick={() => handleEdit(item)}
+                          className="text-blue-600 hover:text-blue-800 font-medium mr-2"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => removeIncome(item.id)}
+                          className="text-red-600 hover:text-red-800 font-medium"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </>
+                  )}
                 </tr>
               ))
             )}
