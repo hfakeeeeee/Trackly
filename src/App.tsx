@@ -9,6 +9,7 @@ import { Bills } from './components/Bills';
 import { ExpenseTracker } from './components/ExpenseTracker';
 import { ExpenseChart } from './components/ExpenseChart';
 import { FinancialOverviewChart } from './components/FinancialOverviewChart';
+import { CategoryManager } from './components/CategoryManager';
 
 function App() {
   return (
@@ -35,8 +36,15 @@ function App() {
             <ExpenseChart />
           </div>
           
-          {/* Row 4: Expense Tracker (Full Width) */}
-          <ExpenseTracker />
+          {/* Row 4: Expense Tracker + Category Manager */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div className="lg:col-span-2">
+              <ExpenseTracker />
+            </div>
+            <div className="lg:col-span-1">
+              <CategoryManager />
+            </div>
+          </div>
         </main>
         
         <footer className="bg-white border-t border-gray-200 mt-12">

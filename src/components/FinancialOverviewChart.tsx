@@ -43,7 +43,7 @@ export const FinancialOverviewChart: React.FC = () => {
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Financial Overview</h2>
       
       {chartData.length === 0 ? (
-        <div className="flex items-center justify-center h-80 text-gray-500">
+        <div className="flex items-center justify-center h-64 text-gray-500">
           <div className="text-center">
             <svg
               className="mx-auto h-12 w-12 text-gray-400 mb-3"
@@ -63,52 +63,54 @@ export const FinancialOverviewChart: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
+        <div>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
           
           {/* Summary Cards */}
-          <div className="grid grid-cols-2 gap-3 mt-4">
+          <div className="grid grid-cols-2 gap-2 mt-3">
             {totalDebt > 0 && (
-              <div className="bg-red-50 p-3 rounded-lg">
-                <p className="text-sm text-gray-600">Debt</p>
-                <p className="text-lg font-bold text-red-600">{formatCurrency(totalDebt)}</p>
+              <div className="bg-red-50 p-2 rounded-lg">
+                <p className="text-xs text-gray-600">Debt</p>
+                <p className="text-sm font-bold text-red-600">{formatCurrency(totalDebt)}</p>
               </div>
             )}
             {totalBills > 0 && (
-              <div className="bg-orange-50 p-3 rounded-lg">
-                <p className="text-sm text-gray-600">Bills</p>
-                <p className="text-lg font-bold text-orange-600">{formatCurrency(totalBills)}</p>
+              <div className="bg-orange-50 p-2 rounded-lg">
+                <p className="text-xs text-gray-600">Bills</p>
+                <p className="text-sm font-bold text-orange-600">{formatCurrency(totalBills)}</p>
               </div>
             )}
             {totalSavings > 0 && (
-              <div className="bg-green-50 p-3 rounded-lg">
-                <p className="text-sm text-gray-600">Savings</p>
-                <p className="text-lg font-bold text-green-600">{formatCurrency(totalSavings)}</p>
+              <div className="bg-green-50 p-2 rounded-lg">
+                <p className="text-xs text-gray-600">Savings</p>
+                <p className="text-sm font-bold text-green-600">{formatCurrency(totalSavings)}</p>
               </div>
             )}
             {totalExpenses > 0 && (
-              <div className="bg-purple-50 p-3 rounded-lg">
-                <p className="text-sm text-gray-600">Expenses</p>
-                <p className="text-lg font-bold text-purple-600">{formatCurrency(totalExpenses)}</p>
+              <div className="bg-purple-50 p-2 rounded-lg">
+                <p className="text-xs text-gray-600">Expenses</p>
+                <p className="text-sm font-bold text-purple-600">{formatCurrency(totalExpenses)}</p>
               </div>
             )}
           </div>
