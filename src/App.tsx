@@ -16,7 +16,7 @@ function App() {
     <AppProvider>
       <div className="min-h-screen bg-gray-100">
         <Header />
-        <main className="container mx-auto px-6 py-8">
+        <main className="px-8 py-8">
           {/* Row 1: Overview + Financial Overview Chart */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <Overview />

@@ -23,7 +23,7 @@ export const Header: React.FC = () => {
 
   return (
     <header className="bg-gradient-to-r from-primary-600 to-primary-800 text-white shadow-lg">
-      <div className="container mx-auto px-6 py-8">
+      <div className="px-8 py-8">
         <h1 className="text-3xl font-bold mb-6">Trackly - {currentMonth}</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
