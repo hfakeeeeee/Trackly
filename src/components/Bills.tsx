@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../AppContext';
 
 export const Bills: React.FC = () => {
   const { bills, addBill, removeBill, updateBill } = useApp();
-  const MAX_ROWS = 20;
+  const [maxRows, setMaxRows] = useState(20);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -97,9 +97,20 @@ export const Bills: React.FC = () => {
     <section className="bg-white rounded-lg shadow-md p-6 mb-6 flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-gray-800">Bills</h2>
-        <div className="bg-orange-100 px-4 py-2 rounded-lg">
-          <span className="text-sm text-gray-600">Total: </span>
-          <span className="text-lg font-bold text-orange-700">{formatCurrency(totalBills)}</span>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setMaxRows(maxRows + 5)}
+            className="bg-primary-600 text-white p-2 rounded-md hover:bg-primary-700 transition-colors"
+            title="Add 5 more rows"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
+          <div className="bg-orange-100 px-4 py-2 rounded-lg">
+            <span className="text-sm text-gray-600">Total: </span>
+            <span className="text-lg font-bold text-orange-700">{formatCurrency(totalBills)}</span>
+          </div>
         </div>
       </div>
 
@@ -113,7 +124,7 @@ export const Bills: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {Array.from({ length: MAX_ROWS }, (_, index) => renderRow(index))}
+            {Array.from({ length: maxRows }, (_, index) => renderRow(index))}
           </tbody>
         </table>
       </div>

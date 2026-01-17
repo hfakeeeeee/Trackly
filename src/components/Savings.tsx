@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../AppContext';
 
 export const Savings: React.FC = () => {
   const { savings, addSavings, removeSavings, updateSavings, getTotalSavings } = useApp();
-  const MAX_ROWS = 5;
+  const [maxRows, setMaxRows] = useState(5);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -78,9 +78,20 @@ export const Savings: React.FC = () => {
     <section className="bg-white rounded-lg shadow-md p-6 mb-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-gray-800">Savings</h2>
-        <div className="bg-blue-100 px-4 py-2 rounded-lg">
-          <span className="text-sm text-gray-600">Total: </span>
-          <span className="text-lg font-bold text-blue-700">{formatCurrency(getTotalSavings())}</span>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setMaxRows(maxRows + 5)}
+            className="bg-primary-600 text-white p-2 rounded-md hover:bg-primary-700 transition-colors"
+            title="Add 5 more rows"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
+          <div className="bg-blue-100 px-4 py-2 rounded-lg">
+            <span className="text-sm text-gray-600">Total: </span>
+            <span className="text-lg font-bold text-blue-700">{formatCurrency(getTotalSavings())}</span>
+          </div>
         </div>
       </div>
 
@@ -93,7 +104,7 @@ export const Savings: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {Array.from({ length: MAX_ROWS }, (_, index) => renderRow(index))}
+            {Array.from({ length: maxRows }, (_, index) => renderRow(index))}
           </tbody>
         </table>
       </div>

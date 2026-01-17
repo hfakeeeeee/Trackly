@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../AppContext';
 
 export const ExpenseTracker: React.FC = () => {
   const { expenses, categories, addExpense, removeExpense, updateExpense } = useApp();
-  const MAX_ROWS = 50;
+  const [maxRows, setMaxRows] = useState(50);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -116,16 +116,27 @@ export const ExpenseTracker: React.FC = () => {
   };
 
   return (
-    <section className="bg-white rounded-lg shadow-md p-6 mb-6">
+    <section className="bg-white rounded-lg shadow-md p-6 mb-6 h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-gray-800">Expense Tracker</h2>
-        <div className="bg-purple-100 px-4 py-2 rounded-lg">
-          <span className="text-sm text-gray-600">Total: </span>
-          <span className="text-lg font-bold text-purple-700">{formatCurrency(totalExpenses)}</span>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setMaxRows(maxRows + 10)}
+            className="bg-primary-600 text-white p-2 rounded-md hover:bg-primary-700 transition-colors"
+            title="Add 10 more rows"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
+          <div className="bg-purple-100 px-4 py-2 rounded-lg">
+            <span className="text-sm text-gray-600">Total: </span>
+            <span className="text-lg font-bold text-purple-700">{formatCurrency(totalExpenses)}</span>
+          </div>
         </div>
       </div>
 
-      <div className="overflow-x-auto border border-gray-300 rounded">
+      <div className="overflow-auto flex-1 border border-gray-300 rounded">
         <table className="w-full">
           <thead className="sticky top-0 bg-white">
             <tr className="border-b-2 border-gray-300">
@@ -136,7 +147,7 @@ export const ExpenseTracker: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {Array.from({ length: MAX_ROWS }, (_, index) => renderRow(index))}
+            {Array.from({ length: maxRows }, (_, index) => renderRow(index))}
           </tbody>
         </table>
       </div>

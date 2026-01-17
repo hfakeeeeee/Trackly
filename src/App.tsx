@@ -43,9 +43,11 @@ function App() {
             <div className="lg:col-span-3">
               <ExpenseTracker />
             </div>
-            <div className="lg:col-span-2 flex flex-col gap-6">
+            <div className="lg:col-span-2 flex flex-col gap-6 h-full">
               <ExpenseChart />
-              <CategoryManager />
+              <div className="flex-1">
+                <CategoryManager />
+              </div>
             </div>
           </div>
         </main>
