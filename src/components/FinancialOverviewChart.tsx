@@ -20,9 +20,11 @@ export const FinancialOverviewChart: React.FC = () => {
   ].filter((item) => item.value > 0);
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'VND',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(value);
   };
 
@@ -39,11 +41,11 @@ export const FinancialOverviewChart: React.FC = () => {
   };
 
   return (
-    <section className="bg-white rounded-lg shadow-md p-6 mb-6">
+    <section className="bg-white rounded-lg shadow-md p-6 mb-6 h-full flex flex-col">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Financial Overview</h2>
       
       {chartData.length === 0 ? (
-        <div className="flex items-center justify-center h-64 text-gray-500">
+        <div className="flex items-center justify-center flex-1 text-gray-500">
           <div className="text-center">
             <svg
               className="mx-auto h-12 w-12 text-gray-400 mb-3"

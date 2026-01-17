@@ -15,16 +15,18 @@ export const Header: React.FC = () => {
   const remainingAmount = getRemainingAmount();
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'VND',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(amount);
   };
 
   return (
     <header className="bg-gradient-to-r from-primary-600 to-primary-800 text-white shadow-lg">
       <div className="px-8 py-8">
-        <h1 className="text-3xl font-bold mb-6">Trackly - {currentMonth}</h1>
+        <h1 className="text-3xl font-bold mb-6">{currentMonth}</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
             <p className="text-sm opacity-90 mb-1">Total Income</p>

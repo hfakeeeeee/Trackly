@@ -1,4 +1,3 @@
-import React from 'react';
 import { AppProvider } from './AppContext';
 import { Header } from './components/Header';
 import { Overview } from './components/Overview';
@@ -18,30 +17,34 @@ function App() {
         <Header />
         <main className="px-8 py-8">
           {/* Row 1: Overview + Financial Overview Chart */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <Overview />
-            <FinancialOverviewChart />
-          </div>
-          
-          {/* Row 2: Income + Bills + Debt */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            <Income />
-            <Bills />
-            <Debt />
-          </div>
-          
-          {/* Row 3: Savings + Expense Distribution */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <Savings />
-            <ExpenseChart />
-          </div>
-          
-          {/* Row 4: Expense Tracker + Category Manager */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
             <div className="lg:col-span-2">
+              <Overview />
+            </div>
+            <div className="lg:col-span-3">
+              <FinancialOverviewChart />
+            </div>
+          </div>
+          
+          {/* Row 2: Income/Debt/Savings (40%) + Bills (60%) */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+            <div className="lg:col-span-2 flex flex-col gap-6">
+              <Income />
+              <Debt />
+              <Savings />
+            </div>
+            <div className="lg:col-span-3 h-full">
+              <Bills />
+            </div>
+          </div>
+          
+          {/* Row 3: Expense Tracker (60%) + Expense Distribution & Category Manager (40%) */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+            <div className="lg:col-span-3">
               <ExpenseTracker />
             </div>
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-2 flex flex-col gap-6">
+              <ExpenseChart />
               <CategoryManager />
             </div>
           </div>

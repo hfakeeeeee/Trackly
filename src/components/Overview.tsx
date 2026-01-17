@@ -7,7 +7,7 @@ export const Overview: React.FC = () => {
 
   const today = new Date();
   const endDate = new Date(periodSettings.endDate);
-  const daysRemaining = Math.max(0, differenceInDays(endDate, today));
+  const daysRemaining = Math.max(0, differenceInDays(endDate, today) + 1);
   const remainingAmount = getRemainingAmount();
   const dailyAllowance = daysRemaining > 0 ? remainingAmount / daysRemaining : 0;
 
@@ -20,16 +20,18 @@ export const Overview: React.FC = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'VND',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(amount);
   };
 
   return (
-    <section className="bg-white rounded-lg shadow-md p-6 mb-6">
+    <section className="bg-white rounded-lg shadow-md p-6 mb-6 h-full flex flex-col">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Overview</h2>
-      <div className="space-y-4">
+      <div className="space-y-4 flex-1 flex flex-col justify-center">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
           <input

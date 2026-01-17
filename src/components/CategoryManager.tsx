@@ -18,9 +18,11 @@ export const CategoryManager: React.FC = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'VND',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(amount);
   };
 
@@ -126,7 +128,6 @@ export const CategoryManager: React.FC = () => {
               <>
                 <div>
                   <p className="font-medium text-gray-800 text-lg">{cat.name}</p>
-                  <p className="text-sm text-gray-500 mt-1">Total spent in this category</p>
                 </div>
                 <div className="text-right flex items-center gap-4">
                   <p className="text-xl font-bold text-purple-600">

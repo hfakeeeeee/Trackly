@@ -1,54 +1,77 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useApp } from '../AppContext';
-import { SavingsItem } from '../types';
 
 export const Savings: React.FC = () => {
   const { savings, addSavings, removeSavings, updateSavings, getTotalSavings } = useApp();
-  const [description, setDescription] = useState('');
-  const [amount, setAmount] = useState('');
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editDescription, setEditDescription] = useState('');
-  const [editAmount, setEditAmount] = useState('');
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (description && amount) {
-      addSavings({
-        description,
-        amount: parseFloat(amount),
-      });
-      setDescription('');
-      setAmount('');
-    }
-  };
+  const MAX_ROWS = 5;
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'VND',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(amount);
   };
 
-  const handleEdit = (item: SavingsItem) => {
-    setEditingId(item.id);
-    setEditDescription(item.description);
-    setEditAmount(item.amount.toString());
-  };
-
-  const handleUpdate = (id: string) => {
-    if (editDescription && editAmount) {
-      updateSavings(id, {
-        description: editDescription,
-        amount: parseFloat(editAmount),
-      });
-      setEditingId(null);
+  const handleCellChange = (index: number, field: 'description' | 'amount', value: string) => {
+    const existingItem = savings[index];
+    
+    if (existingItem) {
+      // Update existing item
+      if (field === 'description') {
+        if (value.trim() === '' && (!existingItem.amount || existingItem.amount === 0)) {
+          removeSavings(existingItem.id);
+        } else {
+          updateSavings(existingItem.id, { description: value });
+        }
+      } else {
+        const numValue = parseFloat(value) || 0;
+        if (numValue === 0 && !existingItem.description.trim()) {
+          removeSavings(existingItem.id);
+        } else {
+          updateSavings(existingItem.id, { amount: numValue });
+        }
+      }
+    } else {
+      // Create new item
+      if (field === 'description' && value.trim()) {
+        addSavings({ description: value, amount: 0 });
+      } else if (field === 'amount' && value) {
+        const numValue = parseFloat(value) || 0;
+        if (numValue > 0) {
+          addSavings({ description: '', amount: numValue });
+        }
+      }
     }
   };
 
-  const handleCancelEdit = () => {
-    setEditingId(null);
-    setEditDescription('');
-    setEditAmount('');
+  const renderRow = (index: number) => {
+    const item = savings[index];
+    
+    return (
+      <tr key={index} className="border-b border-gray-200 hover:bg-gray-50">
+        <td className="py-2 px-2 border-r border-gray-200">
+          <input
+            type="text"
+            value={item?.description || ''}
+            onChange={(e) => handleCellChange(index, 'description', e.target.value)}
+            className="w-full px-2 py-1 border-0 focus:outline-none focus:ring-1 focus:ring-primary-500 rounded bg-transparent"
+            placeholder="Enter description"
+          />
+        </td>
+        <td className="py-2 px-2">
+          <input
+            type="number"
+            step="1"
+            value={item?.amount || ''}
+            onChange={(e) => handleCellChange(index, 'amount', e.target.value)}
+            className="w-full px-2 py-1 border-0 focus:outline-none focus:ring-1 focus:ring-primary-500 rounded text-right bg-transparent"
+            placeholder="0"
+          />
+        </td>
+      </tr>
+    );
   };
 
   return (
@@ -61,123 +84,16 @@ export const Savings: React.FC = () => {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-3">
-        <input
-          type="text"
-          placeholder="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-        />
-        <input
-          type="number"
-          step="0.01"
-          placeholder="Amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-        />
-        <button
-          type="submit"
-          className="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 transition-colors font-medium flex items-center justify-center"
-          title="Add Savings"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-        </button>
-      </form>
-
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto border border-gray-300 rounded">
         <table className="w-full">
           <thead>
-            <tr className="border-b-2 border-gray-200">
-              <th className="text-left py-3 px-4 font-semibold text-gray-700">Description</th>
-              <th className="text-right py-3 px-4 font-semibold text-gray-700">Amount</th>
-              <th className="text-center py-3 px-4 font-semibold text-gray-700">Action</th>
+            <tr className="border-b-2 border-gray-300">
+              <th className="text-left py-3 px-2 font-semibold text-gray-700 border-r border-gray-200">Description</th>
+              <th className="text-right py-3 px-2 font-semibold text-gray-700 w-32">Amount</th>
             </tr>
           </thead>
           <tbody>
-            {savings.length === 0 ? (
-              <tr>
-                <td colSpan={3} className="text-center py-8 text-gray-500">
-                  No savings entries yet. Start saving today!
-                </td>
-              </tr>
-            ) : (
-              savings.map((item) => (
-                <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
-                  {editingId === item.id ? (
-                    <>
-                      <td className="py-3 px-4">
-                        <input
-                          type="text"
-                          value={editDescription}
-                          onChange={(e) => setEditDescription(e.target.value)}
-                          className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        />
-                      </td>
-                      <td className="py-3 px-4">
-                        <input
-                          type="number"
-                          step="0.01"
-                          value={editAmount}
-                          onChange={(e) => setEditAmount(e.target.value)}
-                          className="w-full px-2 py-1 border border-gray-300 rounded text-right focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        />
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <button
-                          onClick={() => handleUpdate(item.id)}
-                          className="text-green-600 hover:text-green-800 font-medium mr-2 p-1"
-                          title="Save"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={handleCancelEdit}
-                          className="text-gray-600 hover:text-gray-800 font-medium p-1"
-                          title="Cancel"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td className="py-3 px-4">{item.description}</td>
-                      <td className="py-3 px-4 text-right font-medium text-blue-600">
-                        {formatCurrency(item.amount)}
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <button
-                          onClick={() => handleEdit(item)}
-                          className="text-blue-600 hover:text-blue-800 font-medium mr-2 p-1"
-                          title="Edit"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => removeSavings(item.id)}
-                          className="text-red-600 hover:text-red-800 font-medium p-1"
-                          title="Delete"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </td>
-                    </>
-                  )}
-                </tr>
-              ))
-            )}
+            {Array.from({ length: MAX_ROWS }, (_, index) => renderRow(index))}
           </tbody>
         </table>
       </div>
