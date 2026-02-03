@@ -1,9 +1,22 @@
 import React from 'react';
 import { useApp } from '../AppContext';
 import { format } from 'date-fns';
+import { t } from '../i18n';
 
 export const Header: React.FC = () => {
-  const { periodSettings, getTotalIncome, getTotalSavings, getTotalExpenses, getRemainingAmount, debts, bills } = useApp();
+  const {
+    periodSettings,
+    getTotalIncome,
+    getTotalSavings,
+    getTotalExpenses,
+    getRemainingAmount,
+    debts,
+    bills,
+    uiSettings,
+    toggleTheme,
+    setLanguage,
+  } = useApp();
+  const { language, theme } = uiSettings;
 
   const currentMonth = format(new Date(periodSettings.startDate), 'MMMM yyyy');
   const totalIncome = getTotalIncome();
@@ -35,30 +48,50 @@ export const Header: React.FC = () => {
       <div className="relative px-6 py-10 sm:px-10 animate-fade-in">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="pill inline-block bg-white/15 text-white">Monthly Snapshot</p>
+            <p className="pill inline-block bg-white/15 text-white">{t(language, 'monthlySnapshot')}</p>
             <h1 className="mt-3 font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
               {currentMonth}
             </h1>
           </div>
-          <div className="text-sm text-white/70">
-            Trackly keeps your month on course.
+          <div className="flex flex-wrap items-center gap-3 text-sm text-white/70">
+            <span>{t(language, 'tagline')}</span>
+            <div className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-2 py-1">
+              <span className="text-xs uppercase tracking-wide text-white/60">{t(language, 'theme')}</span>
+              <button
+                onClick={toggleTheme}
+                className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-1 text-xs font-semibold text-white transition hover:bg-white/25"
+                title={theme === 'dark' ? t(language, 'light') : t(language, 'dark')}
+              >
+                {theme === 'dark' ? t(language, 'dark') : t(language, 'light')}
+              </button>
+            </div>
+            <div className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-2 py-1">
+              <span className="text-xs uppercase tracking-wide text-white/60">{t(language, 'language')}</span>
+              <button
+                onClick={() => setLanguage(language === 'en' ? 'vi' : 'en')}
+                className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-1 text-xs font-semibold text-white transition hover:bg-white/25"
+                title={language === 'en' ? 'Tiếng Việt' : 'English'}
+              >
+                {language === 'en' ? 'EN' : 'VI'}
+              </button>
+            </div>
           </div>
         </div>
         <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div className="stat-card">
-            <p className="text-xs uppercase tracking-wide text-white/70">Total Income</p>
+            <p className="text-xs uppercase tracking-wide text-white/70">{t(language, 'totalIncome')}</p>
             <p className="mt-2 text-2xl font-semibold">{formatCurrency(totalIncome)}</p>
           </div>
           <div className="stat-card">
-            <p className="text-xs uppercase tracking-wide text-white/70">Total Savings</p>
+            <p className="text-xs uppercase tracking-wide text-white/70">{t(language, 'totalSavings')}</p>
             <p className="mt-2 text-2xl font-semibold">{formatCurrency(totalSavings)}</p>
           </div>
           <div className="stat-card">
-            <p className="text-xs uppercase tracking-wide text-white/70">Total Money Spent</p>
+            <p className="text-xs uppercase tracking-wide text-white/70">{t(language, 'totalMoneySpent')}</p>
             <p className="mt-2 text-2xl font-semibold">{formatCurrency(totalSpend)}</p>
           </div>
           <div className="stat-card">
-            <p className="text-xs uppercase tracking-wide text-white/70">Remaining Amount</p>
+            <p className="text-xs uppercase tracking-wide text-white/70">{t(language, 'remainingAmount')}</p>
             <p className={`mt-2 text-2xl font-semibold ${remainingAmount < 0 ? 'text-rose-200' : 'text-white'}`}>
               {formatCurrency(remainingAmount)}
             </p>

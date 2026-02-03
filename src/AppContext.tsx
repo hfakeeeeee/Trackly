@@ -25,6 +25,9 @@ interface AppContextType extends AppState {
   getTotalSavings: () => number;
   getTotalExpenses: () => number;
   getRemainingAmount: () => number;
+  setTheme: (theme: 'light' | 'dark') => void;
+  toggleTheme: () => void;
+  setLanguage: (language: 'en' | 'vi') => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -49,6 +52,10 @@ const defaultState: AppState = {
     { id: '5', name: 'Healthcare', total: 0 },
     { id: '6', name: 'Others', total: 0 },
   ],
+  uiSettings: {
+    theme: 'light',
+    language: 'en',
+  },
 };
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -56,7 +63,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved) as Partial<AppState>;
+        return {
+          ...defaultState,
+          ...parsed,
+          uiSettings: {
+            ...defaultState.uiSettings,
+            ...(parsed.uiSettings ?? {}),
+          },
+        };
       } catch {
         return defaultState;
       }
@@ -67,6 +82,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (state.uiSettings.theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }, [state.uiSettings.theme]);
 
   const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
 
@@ -274,6 +298,27 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return getTotalIncome() - getTotalSavings() - getTotalExpenses() - totalDebts - totalBills;
   };
 
+  const setTheme = (theme: 'light' | 'dark') => {
+    setState(prev => ({
+      ...prev,
+      uiSettings: { ...prev.uiSettings, theme },
+    }));
+  };
+
+  const toggleTheme = () => {
+    setState(prev => ({
+      ...prev,
+      uiSettings: { ...prev.uiSettings, theme: prev.uiSettings.theme === 'dark' ? 'light' : 'dark' },
+    }));
+  };
+
+  const setLanguage = (language: 'en' | 'vi') => {
+    setState(prev => ({
+      ...prev,
+      uiSettings: { ...prev.uiSettings, language },
+    }));
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -301,6 +346,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         getTotalSavings,
         getTotalExpenses,
         getRemainingAmount,
+        setTheme,
+        toggleTheme,
+        setLanguage,
       }}
     >
       {children}

@@ -9,11 +9,12 @@ import { ExpenseTracker } from './components/ExpenseTracker';
 import { ExpenseChart } from './components/ExpenseChart';
 import { FinancialOverviewChart } from './components/FinancialOverviewChart';
 import { CategoryManager } from './components/CategoryManager';
+import { Footer } from './components/Footer';
 
 function App() {
   return (
     <AppProvider>
-      <div className="min-h-screen text-ink-900">
+      <div className="min-h-screen text-ink-900 dark:text-ink-100">
         <Header />
         <main className="px-2 pb-16 pt-8 sm:px-4 lg:px-6">
           <div className="mx-auto max-w-screen-2xl">
@@ -54,13 +55,7 @@ function App() {
           </div>
         </main>
 
-        <footer className="mt-10 border-t border-ink-100/70 bg-white/70 backdrop-blur">
-          <div className="mx-auto max-w-6xl px-6 py-4">
-            <p className="text-center text-ink-500 text-sm">
-              (c) 2026 Trackly - Personal Expense Tracker
-            </p>
-          </div>
-        </footer>
+        <Footer />
       </div>
     </AppProvider>
   );

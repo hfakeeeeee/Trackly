@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { useApp } from '../AppContext';
 import { ConfirmToast } from './ConfirmToast';
+import { t } from '../i18n';
 
 export const CategoryManager: React.FC = () => {
-  const { categories, addCategory, updateCategory, removeCategory } = useApp();
+  const { categories, addCategory, updateCategory, removeCategory, uiSettings } = useApp();
   const [newCategory, setNewCategory] = useState('');
   const [showAddCategory, setShowAddCategory] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const MIN_ROWS = 50;
+  const { language } = uiSettings;
 
   const handleAddCategory = () => {
     if (newCategory.trim()) {
@@ -45,19 +47,19 @@ export const CategoryManager: React.FC = () => {
   return (
     <section className="card card-pad mb-6 h-full flex flex-col">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h2 className="section-title font-heading">Categories</h2>
+        <h2 className="section-title font-heading">{t(language, 'categories')}</h2>
         <div className="relative flex items-center gap-2">
           <button
             onClick={handleClearAll}
             className="btn-ghost text-rose-600 hover:text-rose-700"
-            title="Clear all category rows"
+            title={t(language, 'confirmClearCategories')}
           >
-            Clear All
+            {t(language, 'clearAll')}
           </button>
           <button
             onClick={() => setShowAddCategory(!showAddCategory)}
             className={`${showAddCategory ? 'btn-ghost' : 'btn-primary'} group transition-transform duration-200 hover:scale-105 active:scale-95`}
-            title={showAddCategory ? 'Cancel' : 'Add Category'}
+            title={showAddCategory ? t(language, 'cancel') : t(language, 'addCategory')}
           >
             {showAddCategory ? (
               <svg className="w-5 h-5 animate-pop-in transition-transform duration-200 group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,8 +73,10 @@ export const CategoryManager: React.FC = () => {
           </button>
           <ConfirmToast
             open={confirmOpen}
-            message="Clear all category rows?"
-            confirmLabel="Clear All"
+            message={t(language, 'confirmClearCategories')}
+            subtext={t(language, 'confirmSubtext')}
+            confirmLabel={t(language, 'clearAll')}
+            cancelLabel={t(language, 'cancel')}
             positionClassName="absolute right-0 top-full mt-2 z-50"
             onCancel={() => setConfirmOpen(false)}
             onConfirm={handleConfirmClearAll}
@@ -84,7 +88,7 @@ export const CategoryManager: React.FC = () => {
         <div className="mb-4 flex gap-2">
           <input
             type="text"
-            placeholder="New category name"
+            placeholder={t(language, 'newCategoryName')}
             value={newCategory}
             onChange={(e) => setNewCategory(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
@@ -93,7 +97,7 @@ export const CategoryManager: React.FC = () => {
           <button
             onClick={handleAddCategory}
             className="btn-primary group transition-transform duration-200 hover:scale-105 active:scale-95"
-            title="Add"
+            title={t(language, 'add')}
           >
             <svg className="w-5 h-5 animate-pop-in transition-transform duration-200 group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -106,10 +110,10 @@ export const CategoryManager: React.FC = () => {
         <table className="w-full">
           <thead className="sticky top-0 table-head">
             <tr className="border-b border-ink-100/80">
-              <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 border-r border-ink-100/70">Expense</th>
-              <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-40 border-r border-ink-100/70">Amount</th>
-              <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-24 border-r border-ink-100/70">Percentage</th>
-              <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-16">Action</th>
+              <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 border-r border-ink-100/70">{t(language, 'expense')}</th>
+              <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 w-40 border-r border-ink-100/70">{t(language, 'amount')}</th>
+              <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 w-24 border-r border-ink-100/70">{t(language, 'percentage')}</th>
+              <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 w-16">{t(language, 'action')}</th>
             </tr>
           </thead>
           <tbody>
@@ -128,16 +132,16 @@ export const CategoryManager: React.FC = () => {
                     />
                   </td>
                   <td className="py-2 px-3 text-right border-r border-ink-100/70">
-                    <span className="font-semibold text-teal-700">{formatCurrency(cat.total)}</span>
+                    <span className="font-semibold text-teal-700 dark:text-teal-300">{formatCurrency(cat.total)}</span>
                   </td>
                   <td className="py-2 px-3 text-right border-r border-ink-100/70">
-                    <span className="font-semibold text-ink-700">{percentage}%</span>
+                    <span className="font-semibold text-ink-700 dark:text-ink-200">{percentage}%</span>
                   </td>
                   <td className="py-2 px-3 text-center">
                     <button
                       onClick={() => removeCategory(cat.id)}
                       className="text-amber-600 hover:text-amber-700 font-medium p-1 transition-transform duration-200 hover:scale-110 active:scale-95"
-                      title="Clear row"
+                      title={t(language, 'clearRow')}
                     >
                       <svg className="w-5 h-5 transition-transform duration-200 hover:-rotate-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H8m0 0l3.5-3.5M8 12l3.5 3.5M4 20h10a2 2 0 002-2v-2" />

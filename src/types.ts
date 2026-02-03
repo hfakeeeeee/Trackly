@@ -53,4 +53,8 @@ export interface AppState {
   bills: BillItem[];
   expenses: ExpenseItem[];
   categories: Category[];
+  uiSettings: {
+    theme: 'light' | 'dark';
+    language: 'en' | 'vi';
+  };
 }

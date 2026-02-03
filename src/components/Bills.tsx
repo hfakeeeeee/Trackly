@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useApp } from '../AppContext';
 import { ConfirmToast } from './ConfirmToast';
+import { t } from '../i18n';
 
 export const Bills: React.FC = () => {
-  const { bills, addBill, removeBill, updateBill } = useApp();
+  const { bills, addBill, removeBill, updateBill, uiSettings } = useApp();
   const [maxRows, setMaxRows] = useState(20);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const { language } = uiSettings;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -79,7 +81,7 @@ export const Bills: React.FC = () => {
             value={item?.description || ''}
             onChange={(e) => handleCellChange(index, 'description', e.target.value)}
             className="input-ghost"
-            placeholder="Enter description"
+            placeholder={t(language, 'enterDescription')}
           />
         </td>
         <td className="py-2 px-3 border-r border-ink-100/70">
@@ -106,7 +108,7 @@ export const Bills: React.FC = () => {
             <button
               onClick={() => removeBill(item.id)}
               className="text-amber-600 hover:text-amber-700 font-medium p-1 transition-transform duration-200 hover:scale-110 active:scale-95"
-              title="Clear row"
+              title={t(language, 'clearRow')}
             >
               <svg className="w-5 h-5 transition-transform duration-200 hover:-rotate-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H8m0 0l3.5-3.5M8 12l3.5 3.5M4 20h10a2 2 0 002-2v-2" />
@@ -121,12 +123,12 @@ export const Bills: React.FC = () => {
   return (
     <section className="card card-pad mb-6 flex flex-col">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h2 className="section-title font-heading">Bills</h2>
+        <h2 className="section-title font-heading">{t(language, 'bills')}</h2>
         <div className="relative flex items-center gap-3">
           <button
             onClick={() => setMaxRows(maxRows + 1)}
             className="btn-ghost group transition-transform duration-200 hover:scale-105 active:scale-95"
-            title="Add 1 more row"
+            title={t(language, 'addRow')}
           >
             <svg className="w-5 h-5 animate-pop-in transition-transform duration-200 group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -135,18 +137,20 @@ export const Bills: React.FC = () => {
           <button
             onClick={handleClearAll}
             className="btn-ghost text-rose-600 hover:text-rose-700"
-            title="Clear all bill rows"
+            title={t(language, 'confirmClearBills')}
           >
-            Clear All
+            {t(language, 'clearAll')}
           </button>
-          <div className="rounded-full border border-amber-200/60 bg-amber-50/70 px-4 py-2">
-            <span className="text-xs uppercase tracking-wide text-ink-500">Total</span>
-            <span className="ml-2 text-sm font-semibold text-amber-700">{formatCurrency(totalBills)}</span>
+          <div className="rounded-full border border-amber-200/60 bg-amber-50/70 px-4 py-2 dark:bg-amber-500/10 dark:border-amber-500/30">
+            <span className="text-xs uppercase tracking-wide text-ink-500 dark:text-ink-400">{t(language, 'total')}</span>
+            <span className="ml-2 text-sm font-semibold text-amber-700 dark:text-amber-300">{formatCurrency(totalBills)}</span>
           </div>
           <ConfirmToast
             open={confirmOpen}
-            message="Clear all bill rows?"
-            confirmLabel="Clear All"
+            message={t(language, 'confirmClearBills')}
+            subtext={t(language, 'confirmSubtext')}
+            confirmLabel={t(language, 'clearAll')}
+            cancelLabel={t(language, 'cancel')}
             positionClassName="absolute right-0 top-full mt-2 z-50"
             onCancel={() => setConfirmOpen(false)}
             onConfirm={handleConfirmClearAll}
@@ -158,10 +162,10 @@ export const Bills: React.FC = () => {
         <table className="w-full">
           <thead className="sticky top-0 table-head">
             <tr className="border-b border-ink-100/80">
-              <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 border-r border-ink-100/70">Description</th>
-              <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-32 border-r border-ink-100/70">Due Date</th>
-              <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-40 border-r border-ink-100/70">Amount</th>
-              <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-16">Action</th>
+              <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 border-r border-ink-100/70">{t(language, 'description')}</th>
+              <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 w-32 border-r border-ink-100/70">{t(language, 'dueDate')}</th>
+              <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 w-40 border-r border-ink-100/70">{t(language, 'amount')}</th>
+              <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 w-16">{t(language, 'action')}</th>
             </tr>
           </thead>
           <tbody>
