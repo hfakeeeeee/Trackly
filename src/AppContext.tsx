@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AppState, IncomeItem, DebtItem, SavingsItem, BillItem, ExpenseItem, Category } from './types';
+import { AppState, IncomeItem, DebtItem, SavingsItem, BillItem, ExpenseItem } from './types';
 
 interface AppContextType extends AppState {
   addIncome: (item: Omit<IncomeItem, 'id'>) => void;

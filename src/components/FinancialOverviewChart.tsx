@@ -3,7 +3,6 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 import { useApp } from '../AppContext';
 import { t } from '../i18n';
 
-const COLORS = ['#f43f5e', '#f97316', '#14b8a6', '#7c3aed'];
 
 export const FinancialOverviewChart: React.FC = () => {
   const { debts, bills, savings, expenses, uiSettings } = useApp();
