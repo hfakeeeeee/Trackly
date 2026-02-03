@@ -56,6 +56,13 @@ export const Debt: React.FC = () => {
     }
   };
 
+  const handleClearAll = () => {
+    if (debts.length === 0) return;
+    const confirmed = window.confirm('Clear all debt rows?');
+    if (!confirmed) return;
+    debts.forEach((item) => removeDebt(item.id));
+  };
+
   const renderRow = (index: number) => {
     const item = debts[index];
     
@@ -89,6 +96,19 @@ export const Debt: React.FC = () => {
             placeholder="0"
           />
         </td>
+        <td className="py-2 px-3 text-center">
+          {item ? (
+            <button
+              onClick={() => removeDebt(item.id)}
+              className="text-amber-600 hover:text-amber-700 font-medium p-1 transition-transform duration-200 hover:scale-110 active:scale-95"
+              title="Clear row"
+            >
+              <svg className="w-5 h-5 transition-transform duration-200 hover:-rotate-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H8m0 0l3.5-3.5M8 12l3.5 3.5M4 20h10a2 2 0 002-2v-2" />
+              </svg>
+            </button>
+          ) : null}
+        </td>
       </tr>
     );
   };
@@ -107,6 +127,13 @@ export const Debt: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
           </button>
+          <button
+            onClick={handleClearAll}
+            className="btn-ghost text-rose-600 hover:text-rose-700"
+            title="Clear all debt rows"
+          >
+            Clear All
+          </button>
           <div className="rounded-full border border-rose-200/60 bg-rose-50/70 px-4 py-2">
             <span className="text-xs uppercase tracking-wide text-ink-500">Total</span>
             <span className="ml-2 text-sm font-semibold text-rose-700">{formatCurrency(totalDebt)}</span>
@@ -121,6 +148,7 @@ export const Debt: React.FC = () => {
               <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 border-r border-ink-100/70">Description</th>
               <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-32 border-r border-ink-100/70">Due Date</th>
               <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-40">Amount</th>
+              <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-16">Action</th>
             </tr>
           </thead>
           <tbody>
