@@ -25,8 +25,9 @@ interface AppContextType extends AppState {
   getTotalSavings: () => number;
   getTotalExpenses: () => number;
   getRemainingAmount: () => number;
+  themeTransitionId: number;
   setTheme: (theme: 'light' | 'dark') => void;
-  toggleTheme: () => void;
+  toggleTheme: (origin?: { x: number; y: number }) => void;
   setLanguage: (language: 'en' | 'vi') => void;
 }
 
@@ -78,6 +79,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
     return defaultState;
   });
+  const [themeTransitionId, setThemeTransitionId] = useState(0);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -306,11 +308,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }));
   };
 
-  const toggleTheme = () => {
-    setState(prev => ({
-      ...prev,
-      uiSettings: { ...prev.uiSettings, theme: prev.uiSettings.theme === 'dark' ? 'light' : 'dark' },
-    }));
+  const toggleTheme = (origin?: { x: number; y: number }) => {
+    setThemeTransitionId(prev => prev + 1);
+    if (origin) {
+      const root = document.documentElement;
+      root.style.setProperty('--spotlight-x', `${origin.x}px`);
+      root.style.setProperty('--spotlight-y', `${origin.y}px`);
+    }
+    const nextTheme = state.uiSettings.theme === 'dark' ? 'light' : 'dark';
+    window.setTimeout(() => {
+      setState(prev => ({
+        ...prev,
+        uiSettings: { ...prev.uiSettings, theme: nextTheme },
+      }));
+    }, 520);
   };
 
   const setLanguage = (language: 'en' | 'vi') => {
@@ -347,6 +358,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         getTotalSavings,
         getTotalExpenses,
         getRemainingAmount,
+        themeTransitionId,
         setTheme,
         toggleTheme,
         setLanguage,
