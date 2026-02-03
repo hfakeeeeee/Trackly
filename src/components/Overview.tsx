@@ -52,12 +52,12 @@ export const Overview: React.FC = () => {
             className="input"
           />
         </div>
-        <div className="rounded-xl border border-ink-100/70 bg-sand-50/70 p-4">
-          <p className="text-xs uppercase tracking-wide text-ink-600 mb-1 font-semibold">{t(language, 'daysRemaining')}</p>
+        <div className="rounded-xl border border-ink-100/70 bg-sand-50/70 p-4 dark:border-ink-700/70 dark:bg-ink-900/80">
+          <p className="text-xs uppercase tracking-wide text-ink-600 mb-1 font-semibold dark:text-ink-300">{t(language, 'daysRemaining')}</p>
           <p className="text-3xl font-bold text-ink-900 dark:text-ink-100">{daysRemaining}</p>
         </div>
-        <div className="rounded-xl border border-teal-200/60 bg-teal-50/60 p-4">
-          <p className="text-xs uppercase tracking-wide text-ink-500 dark:text-ink-400 mb-1">{t(language, 'dailyAllowance')}</p>
+        <div className="rounded-xl border border-teal-200/60 bg-teal-50/60 p-4 dark:border-teal-500/30 dark:bg-teal-500/10">
+          <p className="text-xs uppercase tracking-wide text-ink-500 mb-1 dark:text-ink-300">{t(language, 'dailyAllowance')}</p>
           <p className={`text-2xl font-semibold ${dailyAllowance < 0 ? 'text-rose-600 dark:text-rose-300' : 'text-teal-700 dark:text-teal-300'}`}>
             {formatCurrency(dailyAllowance)}
           </p>

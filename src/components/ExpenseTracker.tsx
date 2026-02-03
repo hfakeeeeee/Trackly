@@ -163,9 +163,9 @@ export const ExpenseTracker: React.FC = () => {
           >
             {t(language, 'clearAll')}
           </button>
-          <div className="rounded-full border border-ink-200/70 bg-white px-4 py-2 dark:bg-ink-900/50 dark:border-ink-700/70">
-            <span className="text-xs uppercase tracking-wide text-ink-500">{t(language, 'total')}</span>
-            <span className="ml-2 text-sm font-bold text-ink-900">{formatCurrency(totalExpenses)}</span>
+          <div className="rounded-full border border-ink-200/70 bg-white px-4 py-2 dark:bg-ink-900/70 dark:border-ink-700/70">
+            <span className="text-xs uppercase tracking-wide text-ink-500 dark:text-ink-300">{t(language, 'total')}</span>
+            <span className="ml-2 text-sm font-bold text-ink-900 dark:text-white">{formatCurrency(totalExpenses)}</span>
           </div>
           <ConfirmToast
             open={confirmOpen}

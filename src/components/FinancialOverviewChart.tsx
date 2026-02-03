@@ -94,26 +94,26 @@ export const FinancialOverviewChart: React.FC = () => {
           {/* Summary Cards */}
           <div className="grid grid-cols-2 gap-2 mt-3">
             {totalDebt > 0 && (
-              <div className="rounded-xl border border-rose-200/60 bg-rose-50/70 p-2">
-                <p className="text-xs text-ink-500">{t(language, 'debt')}</p>
+              <div className="rounded-xl border border-rose-200/60 bg-rose-50/70 p-2 dark:border-rose-500/30 dark:bg-rose-500/10">
+                <p className="text-xs text-ink-500 dark:text-ink-300">{t(language, 'debt')}</p>
                 <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">{formatCurrency(totalDebt)}</p>
               </div>
             )}
             {totalBills > 0 && (
-              <div className="rounded-xl border border-amber-200/60 bg-amber-50/70 p-2">
-                <p className="text-xs text-ink-500">{t(language, 'bills')}</p>
+              <div className="rounded-xl border border-amber-200/60 bg-amber-50/70 p-2 dark:border-amber-500/30 dark:bg-amber-500/10">
+                <p className="text-xs text-ink-500 dark:text-ink-300">{t(language, 'bills')}</p>
                 <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">{formatCurrency(totalBills)}</p>
               </div>
             )}
             {totalSavings > 0 && (
-              <div className="rounded-xl border border-teal-200/60 bg-teal-50/70 p-2">
-                <p className="text-xs text-ink-500">{t(language, 'savings')}</p>
+              <div className="rounded-xl border border-teal-200/60 bg-teal-50/70 p-2 dark:border-teal-500/30 dark:bg-teal-500/10">
+                <p className="text-xs text-ink-500 dark:text-ink-300">{t(language, 'savings')}</p>
                 <p className="text-sm font-semibold text-teal-700 dark:text-teal-300">{formatCurrency(totalSavings)}</p>
               </div>
             )}
             {totalExpenses > 0 && (
-              <div className="rounded-xl border border-ink-200/60 bg-ink-50/70 p-2">
-                <p className="text-xs text-ink-500">{t(language, 'expense')}</p>
+              <div className="rounded-xl border border-ink-200/60 bg-ink-50/70 p-2 dark:border-ink-700/70 dark:bg-ink-900/70">
+                <p className="text-xs text-ink-500 dark:text-ink-300">{t(language, 'expense')}</p>
                 <p className="text-sm font-semibold text-ink-800 dark:text-ink-100">{formatCurrency(totalExpenses)}</p>
               </div>
             )}
