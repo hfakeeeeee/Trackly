@@ -29,16 +29,24 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(1200px 500px at 10% -20%, rgba(20, 184, 166, 0.18), transparent 60%),
-    radial-gradient(900px 500px at 90% -10%, rgba(249, 115, 22, 0.18), transparent 55%),
-    linear-gradient(180deg, #faf8f5 0%, #f3eee7 60%, #f1ede7 100%);
+    radial-gradient(1200px 500px at 10% -20%, rgba(20, 184, 166, 0.08), transparent 60%),
+    radial-gradient(900px 500px at 90% -10%, rgba(249, 115, 22, 0.08), transparent 55%),
+    linear-gradient(180deg, #ffffff 0%, #faf6f0 60%, #f7f2ec 100%);
+}
+
+.light body {
+  background:
+    radial-gradient(1200px 500px at 10% -20%, rgba(20, 184, 166, 0.08), transparent 60%),
+    radial-gradient(900px 500px at 90% -10%, rgba(249, 115, 22, 0.08), transparent 55%),
+    linear-gradient(180deg, #ffffff 0%, #faf6f0 60%, #f7f2ec 100%);
+  color: #151a24;
 }
 
 .dark body {
   background:
-    radial-gradient(1000px 500px at 10% -20%, rgba(20, 184, 166, 0.2), transparent 60%),
-    radial-gradient(900px 500px at 90% -10%, rgba(249, 115, 22, 0.2), transparent 55%),
-    linear-gradient(180deg, #0f141b 0%, #111827 55%, #0b1118 100%);
+    radial-gradient(1000px 500px at 10% -20%, rgba(20, 184, 166, 0.10), transparent 60%),
+    radial-gradient(900px 500px at 90% -10%, rgba(249, 115, 22, 0.10), transparent 55%),
+    linear-gradient(180deg, #0b1017 0%, #0d131b 55%, #0a1018 100%);
   color: #f8fafc;
 }
 
@@ -195,7 +203,7 @@ body {
 
 @layer components {
   .card {
-    @apply rounded-2xl border border-ink-100/70 bg-white/75 backdrop-blur-xl shadow-soft dark:border-ink-800/70 dark:bg-ink-900/60;
+    @apply rounded-2xl border border-ink-200/80 bg-white backdrop-blur-xl shadow-soft dark:border-ink-700/70 dark:bg-ink-900/80;
   }
 
   .card-pad {
@@ -215,34 +223,86 @@ body {
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center rounded-full border border-ink-200/70 bg-white/70 px-3 py-2 text-ink-700 transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-ink-200 dark:border-ink-700/70 dark:bg-ink-900/40 dark:text-ink-100 dark:hover:bg-ink-900/70 dark:focus:ring-ink-600;
+    @apply inline-flex items-center justify-center rounded-full border border-ink-300 bg-white px-3 py-2 text-ink-900 transition hover:bg-ink-50 focus:outline-none focus:ring-2 focus:ring-ink-300 dark:border-ink-700/80 dark:bg-ink-900/80 dark:text-ink-100 dark:hover:bg-ink-900 dark:focus:ring-ink-600;
   }
 
   .pill {
-    @apply rounded-full bg-sand-100 px-3 py-1 text-xs font-semibold text-ink-600 dark:bg-ink-800/70 dark:text-ink-200;
+    @apply rounded-full bg-sand-100 px-3 py-1 text-xs font-semibold text-ink-900 dark:bg-ink-800/70 dark:text-ink-200;
   }
 
   .stat-card {
-    @apply rounded-2xl border border-white/30 bg-white/10 px-4 py-3 backdrop-blur-xl dark:border-white/10;
+    @apply rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 text-white backdrop-blur-xl;
   }
 
-  .input {
-    @apply w-full rounded-lg border border-ink-200/70 bg-white/70 px-3 py-2 text-ink-800 placeholder:text-ink-400 focus:outline-none focus:ring-2 focus:ring-teal-300 dark:border-ink-700/70 dark:bg-ink-900/40 dark:text-ink-100 dark:placeholder:text-ink-500;
+.input {
+    @apply w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-ink-900 placeholder:text-ink-500 focus:outline-none focus:ring-2 focus:ring-teal-300 dark:border-ink-700/80 dark:bg-ink-900/80 dark:text-ink-100 dark:placeholder:text-ink-500;
   }
 
-  .input-ghost {
-    @apply w-full rounded-md border border-transparent bg-transparent px-2 py-1 text-ink-800 placeholder:text-ink-400 focus:border-teal-200 focus:bg-white/70 focus:outline-none focus:ring-2 focus:ring-teal-300 dark:text-ink-100 dark:placeholder:text-ink-500 dark:focus:bg-ink-900/40;
+.input-ghost {
+    @apply w-full rounded-md border border-transparent bg-transparent px-2 py-1 text-ink-900 placeholder:text-ink-500 focus:border-teal-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-300 dark:text-ink-100 dark:placeholder:text-ink-500 dark:focus:bg-ink-900/80;
   }
 
   .table-shell {
-    @apply overflow-auto rounded-xl border border-ink-100/80 bg-white/60 dark:border-ink-800/70 dark:bg-ink-900/40;
+    @apply overflow-auto rounded-xl border border-ink-200/80 bg-white dark:border-ink-700/80 dark:bg-ink-900/80;
   }
 
   .table-head {
-    @apply bg-sand-50/80 text-ink-600 dark:bg-ink-900/80 dark:text-ink-300;
+    @apply bg-sand-50/95 text-ink-900 dark:bg-ink-900/80 dark:text-ink-200;
   }
 
   .table-row {
-    @apply border-b border-ink-100/70 hover:bg-sand-50/60 dark:border-ink-800/60 dark:hover:bg-ink-800/40;
+    @apply border-b border-ink-200/70 hover:bg-sand-50/80 dark:border-ink-800/70 dark:hover:bg-ink-800/50;
   }
+}
+
+/* Explicit light mode overrides to keep sections bright and readable */
+.light .card {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.18);
+}
+
+
+.light .table-shell {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.18);
+}
+
+.light .table-head {
+  background: rgba(244, 238, 230, 0.95);
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.light .table-row {
+  border-color: rgba(15, 23, 42, 0.12);
+  background: transparent;
+}
+
+.light .input {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.18);
+  color: #111827;
+}
+
+.light .input-ghost {
+  color: #111827;
+}
+
+/* Light mode: ensure titles and buttons are dark text + light surfaces */
+.light .section-title {
+  color: #111827;
+}
+
+.light .btn-ghost {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.25);
+  color: #111827;
+}
+
+.light .btn-ghost:hover {
+  background: #f8fafc;
+}
+
+.light .table-row:hover {
+  background: #f9fafb;
 }

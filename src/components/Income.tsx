@@ -124,7 +124,7 @@ export const Income: React.FC = () => {
           </button>
           <div className="rounded-full border border-teal-200/60 bg-teal-50/70 px-4 py-2 dark:bg-teal-500/10 dark:border-teal-500/30">
             <span className="text-xs uppercase tracking-wide text-ink-500 dark:text-ink-400">{t(language, 'total')}</span>
-            <span className="ml-2 text-sm font-semibold text-teal-700 dark:text-teal-300">{formatCurrency(getTotalIncome())}</span>
+            <span className="ml-2 text-sm font-bold text-teal-800 dark:text-teal-300">{formatCurrency(getTotalIncome())}</span>
           </div>
           <ConfirmToast
             open={confirmOpen}
@@ -143,9 +143,9 @@ export const Income: React.FC = () => {
         <table className="w-full">
           <thead className="table-head">
             <tr className="border-b border-ink-100/80">
-              <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 border-r border-ink-100/70">{t(language, 'description')}</th>
-              <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 w-40 border-r border-ink-100/70">{t(language, 'amount')}</th>
-              <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 w-16">{t(language, 'action')}</th>
+              <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 border-r border-ink-100/70">{t(language, 'description')}</th>
+              <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-40 border-r border-ink-100/70">{t(language, 'amount')}</th>
+              <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-16">{t(language, 'action')}</th>
             </tr>
           </thead>
           <tbody>

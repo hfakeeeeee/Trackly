@@ -85,11 +85,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     const root = document.documentElement;
+    root.classList.remove('dark', 'light');
+    root.classList.add(state.uiSettings.theme);
     if (state.uiSettings.theme === 'dark') {
       root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
     }
+    root.style.colorScheme = state.uiSettings.theme;
   }, [state.uiSettings.theme]);
 
   const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);

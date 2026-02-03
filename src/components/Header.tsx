@@ -48,7 +48,9 @@ export const Header: React.FC = () => {
       <div className="relative px-6 py-10 sm:px-10 animate-fade-in">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="pill inline-block bg-white/15 text-white">{t(language, 'monthlySnapshot')}</p>
+            <p className="pill inline-block bg-white/15 text-white">
+              {t(language, 'monthlySnapshot')}
+            </p>
             <h1 className="mt-3 font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
               {currentMonth}
             </h1>
@@ -78,19 +80,19 @@ export const Header: React.FC = () => {
           </div>
         </div>
         <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <div className="stat-card">
+          <div className="stat-card bg-ink-900/70 text-white border-white/10">
             <p className="text-xs uppercase tracking-wide text-white/70">{t(language, 'totalIncome')}</p>
-            <p className="mt-2 text-2xl font-semibold">{formatCurrency(totalIncome)}</p>
+            <p className="mt-2 text-2xl font-semibold text-white">{formatCurrency(totalIncome)}</p>
           </div>
-          <div className="stat-card">
+          <div className="stat-card bg-ink-900/70 text-white border-white/10">
             <p className="text-xs uppercase tracking-wide text-white/70">{t(language, 'totalSavings')}</p>
-            <p className="mt-2 text-2xl font-semibold">{formatCurrency(totalSavings)}</p>
+            <p className="mt-2 text-2xl font-semibold text-white">{formatCurrency(totalSavings)}</p>
           </div>
-          <div className="stat-card">
+          <div className="stat-card bg-ink-900/70 text-white border-white/10">
             <p className="text-xs uppercase tracking-wide text-white/70">{t(language, 'totalMoneySpent')}</p>
-            <p className="mt-2 text-2xl font-semibold">{formatCurrency(totalSpend)}</p>
+            <p className="mt-2 text-2xl font-semibold text-white">{formatCurrency(totalSpend)}</p>
           </div>
-          <div className="stat-card">
+          <div className="stat-card bg-ink-900/70 text-white border-white/10">
             <p className="text-xs uppercase tracking-wide text-white/70">{t(language, 'remainingAmount')}</p>
             <p className={`mt-2 text-2xl font-semibold ${remainingAmount < 0 ? 'text-rose-200' : 'text-white'}`}>
               {formatCurrency(remainingAmount)}

@@ -53,8 +53,8 @@ export const Overview: React.FC = () => {
           />
         </div>
         <div className="rounded-xl border border-ink-100/70 bg-sand-50/70 p-4">
-          <p className="text-xs uppercase tracking-wide text-ink-500 dark:text-ink-400 mb-1">{t(language, 'daysRemaining')}</p>
-          <p className="text-3xl font-semibold text-ink-900 dark:text-ink-100">{daysRemaining}</p>
+          <p className="text-xs uppercase tracking-wide text-ink-600 mb-1 font-semibold">{t(language, 'daysRemaining')}</p>
+          <p className="text-3xl font-bold text-ink-900 dark:text-ink-100">{daysRemaining}</p>
         </div>
         <div className="rounded-xl border border-teal-200/60 bg-teal-50/60 p-4">
           <p className="text-xs uppercase tracking-wide text-ink-500 dark:text-ink-400 mb-1">{t(language, 'dailyAllowance')}</p>

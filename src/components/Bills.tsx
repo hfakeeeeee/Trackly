@@ -143,7 +143,7 @@ export const Bills: React.FC = () => {
           </button>
           <div className="rounded-full border border-amber-200/60 bg-amber-50/70 px-4 py-2 dark:bg-amber-500/10 dark:border-amber-500/30">
             <span className="text-xs uppercase tracking-wide text-ink-500 dark:text-ink-400">{t(language, 'total')}</span>
-            <span className="ml-2 text-sm font-semibold text-amber-700 dark:text-amber-300">{formatCurrency(totalBills)}</span>
+            <span className="ml-2 text-sm font-bold text-amber-800 dark:text-amber-300">{formatCurrency(totalBills)}</span>
           </div>
           <ConfirmToast
             open={confirmOpen}
@@ -162,10 +162,10 @@ export const Bills: React.FC = () => {
         <table className="w-full">
           <thead className="sticky top-0 table-head">
             <tr className="border-b border-ink-100/80">
-              <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 border-r border-ink-100/70">{t(language, 'description')}</th>
-              <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 w-32 border-r border-ink-100/70">{t(language, 'dueDate')}</th>
-              <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 w-40 border-r border-ink-100/70">{t(language, 'amount')}</th>
-              <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 w-16">{t(language, 'action')}</th>
+              <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 border-r border-ink-100/70">{t(language, 'description')}</th>
+              <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-32 border-r border-ink-100/70">{t(language, 'dueDate')}</th>
+              <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-40 border-r border-ink-100/70">{t(language, 'amount')}</th>
+              <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-16">{t(language, 'action')}</th>
             </tr>
           </thead>
           <tbody>

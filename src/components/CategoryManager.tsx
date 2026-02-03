@@ -110,10 +110,10 @@ export const CategoryManager: React.FC = () => {
         <table className="w-full">
           <thead className="sticky top-0 table-head">
             <tr className="border-b border-ink-100/80">
-              <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 border-r border-ink-100/70">{t(language, 'expense')}</th>
-              <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 w-40 border-r border-ink-100/70">{t(language, 'amount')}</th>
-              <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 w-24 border-r border-ink-100/70">{t(language, 'percentage')}</th>
-              <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 w-16">{t(language, 'action')}</th>
+              <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 border-r border-ink-100/70">{t(language, 'expense')}</th>
+              <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-40 border-r border-ink-100/70">{t(language, 'amount')}</th>
+              <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-24 border-r border-ink-100/70">{t(language, 'percentage')}</th>
+              <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-16">{t(language, 'action')}</th>
             </tr>
           </thead>
           <tbody>
