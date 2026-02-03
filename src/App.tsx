@@ -17,7 +17,7 @@ function App() {
       <div className="min-h-screen text-ink-900 dark:text-ink-100">
         <Header />
         <main className="px-2 pb-16 pt-8 sm:px-4 lg:px-6">
-          <div className="mx-auto max-w-screen-2xl">
+          <div className="mx-auto max-w-screen-2xl animate-rise-in">
             {/* Row 1: Overview + Financial Overview Chart */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6 animate-rise-in">
               <div className="lg:col-span-5">
