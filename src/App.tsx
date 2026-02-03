@@ -18,7 +18,7 @@ function App() {
         <main className="px-2 pb-16 pt-8 sm:px-4 lg:px-6">
           <div className="mx-auto max-w-screen-2xl">
             {/* Row 1: Overview + Financial Overview Chart */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6 animate-rise-in">
               <div className="lg:col-span-5">
                 <Overview />
               </div>
@@ -28,7 +28,7 @@ function App() {
             </div>
 
             {/* Row 2: Income/Debt/Savings (40%) + Bills (60%) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6 animate-rise-in anim-delay-200">
               <div className="lg:col-span-5 flex flex-col gap-6">
                 <Income />
                 <Debt />
@@ -40,7 +40,7 @@ function App() {
             </div>
 
             {/* Row 3: Expense Tracker (60%) + Expense Distribution & Category Manager (40%) */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6 animate-rise-in anim-delay-300">
               <div className="lg:col-span-3">
                 <ExpenseTracker />
               </div>
