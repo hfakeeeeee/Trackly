@@ -110,6 +110,39 @@ body {
   animation: shimmerSweep 6s ease-in-out infinite;
 }
 
+@keyframes auroraShift {
+  0% {
+    transform: translateX(-10%) translateY(0%) scale(1);
+  }
+  50% {
+    transform: translateX(8%) translateY(-6%) scale(1.05);
+  }
+  100% {
+    transform: translateX(-10%) translateY(0%) scale(1);
+  }
+}
+
+@keyframes pulseGlow {
+  0% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0.35;
+  }
+}
+
+.animate-aurora {
+  animation: auroraShift 14s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 5s ease-in-out infinite;
+}
+
+
 @layer components {
   .card {
     @apply rounded-2xl border border-ink-100/70 bg-white/75 backdrop-blur-xl shadow-soft;
