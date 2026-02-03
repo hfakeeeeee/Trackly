@@ -13,49 +13,51 @@ import { CategoryManager } from './components/CategoryManager';
 function App() {
   return (
     <AppProvider>
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen text-ink-900">
         <Header />
-        <main className="px-8 py-8">
-          {/* Row 1: Overview + Financial Overview Chart */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
-            <div className="lg:col-span-2">
-              <Overview />
+        <main className="px-2 pb-16 pt-8 sm:px-4 lg:px-6">
+          <div className="mx-auto max-w-screen-2xl">
+            {/* Row 1: Overview + Financial Overview Chart */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+              <div className="lg:col-span-5">
+                <Overview />
+              </div>
+              <div className="lg:col-span-7">
+                <FinancialOverviewChart />
+              </div>
             </div>
-            <div className="lg:col-span-3">
-              <FinancialOverviewChart />
+
+            {/* Row 2: Income/Debt/Savings (40%) + Bills (60%) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+              <div className="lg:col-span-5 flex flex-col gap-6">
+                <Income />
+                <Debt />
+                <Savings />
+              </div>
+              <div className="lg:col-span-7 h-full">
+                <Bills />
+              </div>
             </div>
-          </div>
-          
-          {/* Row 2: Income/Debt/Savings (40%) + Bills (60%) */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
-            <div className="lg:col-span-2 flex flex-col gap-6">
-              <Income />
-              <Debt />
-              <Savings />
-            </div>
-            <div className="lg:col-span-3 h-full">
-              <Bills />
-            </div>
-          </div>
-          
-          {/* Row 3: Expense Tracker (60%) + Expense Distribution & Category Manager (40%) */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
-            <div className="lg:col-span-3">
-              <ExpenseTracker />
-            </div>
-            <div className="lg:col-span-2 flex flex-col gap-6 h-full">
-              <ExpenseChart />
-              <div className="flex-1">
-                <CategoryManager />
+
+            {/* Row 3: Expense Tracker (60%) + Expense Distribution & Category Manager (40%) */}
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+              <div className="lg:col-span-3">
+                <ExpenseTracker />
+              </div>
+              <div className="lg:col-span-2 flex flex-col gap-6 h-full">
+                <ExpenseChart />
+                <div className="flex-1">
+                  <CategoryManager />
+                </div>
               </div>
             </div>
           </div>
         </main>
-        
-        <footer className="bg-white border-t border-gray-200 mt-12">
-          <div className="container mx-auto px-6 py-4">
-            <p className="text-center text-gray-600 text-sm">
-              © 2026 Trackly - Personal Expense Tracker
+
+        <footer className="mt-10 border-t border-ink-100/70 bg-white/70 backdrop-blur">
+          <div className="mx-auto max-w-6xl px-6 py-4">
+            <p className="text-center text-ink-500 text-sm">
+              (c) 2026 Trackly - Personal Expense Tracker
             </p>
           </div>
         </footer>

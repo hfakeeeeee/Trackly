@@ -31,12 +31,12 @@ export const CategoryManager: React.FC = () => {
   };
 
   return (
-    <section className="bg-white rounded-lg shadow-md p-6 mb-6 h-full flex flex-col">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-800">Categories</h2>
+    <section className="card card-pad mb-6 h-full flex flex-col">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <h2 className="section-title font-heading">Categories</h2>
         <button
           onClick={() => setShowAddCategory(!showAddCategory)}
-          className="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 transition-colors text-sm font-medium flex items-center justify-center"
+          className={showAddCategory ? 'btn-ghost' : 'btn-primary'}
           title={showAddCategory ? 'Cancel' : 'Add Category'}
         >
           {showAddCategory ? (
@@ -59,11 +59,11 @@ export const CategoryManager: React.FC = () => {
             value={newCategory}
             onChange={(e) => setNewCategory(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="input"
           />
           <button
             onClick={handleAddCategory}
-            className="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 transition-colors font-medium flex items-center justify-center"
+            className="btn-primary"
             title="Add"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,14 +73,14 @@ export const CategoryManager: React.FC = () => {
         </div>
       )}
 
-      <div className="overflow-auto flex-1 border border-gray-300 rounded">
+      <div className="table-shell flex-1">
         <table className="w-full">
-          <thead className="sticky top-0 bg-white">
-            <tr className="border-b-2 border-gray-300">
-              <th className="text-left py-3 px-2 font-semibold text-gray-700 border-r border-gray-200">Expense</th>
-              <th className="text-right py-3 px-2 font-semibold text-gray-700 w-32 border-r border-gray-200">Amount</th>
-              <th className="text-right py-3 px-2 font-semibold text-gray-700 w-24 border-r border-gray-200">Percentage</th>
-              <th className="text-center py-3 px-2 font-semibold text-gray-700 w-16">Action</th>
+          <thead className="sticky top-0 table-head">
+            <tr className="border-b border-ink-100/80">
+              <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 border-r border-ink-100/70">Expense</th>
+              <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-40 border-r border-ink-100/70">Amount</th>
+              <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-24 border-r border-ink-100/70">Percentage</th>
+              <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-16">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -89,25 +89,25 @@ export const CategoryManager: React.FC = () => {
               const percentage = totalExpenses > 0 ? ((cat.total / totalExpenses) * 100).toFixed(1) : '0.0';
               
               return (
-                <tr key={cat.id} className="border-b border-gray-200 hover:bg-gray-50">
-                  <td className="py-2 px-2 border-r border-gray-200">
+                <tr key={cat.id} className="table-row">
+                  <td className="py-2 px-3 border-r border-ink-100/70">
                     <input
                       type="text"
                       value={cat.name}
                       onChange={(e) => handleNameChange(cat.id, e.target.value)}
-                      className="w-full px-2 py-1 border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-primary-500 rounded font-medium text-gray-800"
+                      className="input-ghost font-medium"
                     />
                   </td>
-                  <td className="py-2 px-2 text-right border-r border-gray-200">
-                    <span className="font-bold text-purple-600">{formatCurrency(cat.total)}</span>
+                  <td className="py-2 px-3 text-right border-r border-ink-100/70">
+                    <span className="font-semibold text-teal-700">{formatCurrency(cat.total)}</span>
                   </td>
-                  <td className="py-2 px-2 text-right border-r border-gray-200">
-                    <span className="font-semibold text-gray-700">{percentage}%</span>
+                  <td className="py-2 px-3 text-right border-r border-ink-100/70">
+                    <span className="font-semibold text-ink-700">{percentage}%</span>
                   </td>
-                  <td className="py-2 px-2 text-center">
+                  <td className="py-2 px-3 text-center">
                     <button
                       onClick={() => removeCategory(cat.id)}
-                      className="text-red-600 hover:text-red-800 font-medium p-1"
+                      className="text-rose-600 hover:text-rose-700 font-medium p-1"
                       title="Delete"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,11 +119,11 @@ export const CategoryManager: React.FC = () => {
               );
             })}
             {Array.from({ length: Math.max(0, MIN_ROWS - categories.length) }, (_, index) => (
-              <tr key={`empty-${index}`} className="border-b border-gray-200">
-                <td className="py-2 px-2 border-r border-gray-200">&nbsp;</td>
-                <td className="py-2 px-2 border-r border-gray-200">&nbsp;</td>
-                <td className="py-2 px-2 border-r border-gray-200">&nbsp;</td>
-                <td className="py-2 px-2">&nbsp;</td>
+              <tr key={`empty-${index}`} className="table-row">
+                <td className="py-2 px-3 border-r border-ink-100/70">&nbsp;</td>
+                <td className="py-2 px-3 border-r border-ink-100/70">&nbsp;</td>
+                <td className="py-2 px-3 border-r border-ink-100/70">&nbsp;</td>
+                <td className="py-2 px-3">&nbsp;</td>
               </tr>
             ))}
           </tbody>

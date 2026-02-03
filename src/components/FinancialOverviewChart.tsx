@@ -2,7 +2,7 @@ import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { useApp } from '../AppContext';
 
-const COLORS = ['#ef4444', '#f59e0b', '#10b981', '#8b5cf6'];
+const COLORS = ['#f43f5e', '#f97316', '#14b8a6', '#7c3aed'];
 
 export const FinancialOverviewChart: React.FC = () => {
   const { debts, bills, savings, expenses } = useApp();
@@ -31,9 +31,9 @@ export const FinancialOverviewChart: React.FC = () => {
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white px-4 py-2 rounded-lg shadow-lg border border-gray-200">
-          <p className="font-semibold text-gray-800">{payload[0].name}</p>
-          <p className="text-primary-600 font-bold">{formatCurrency(payload[0].value)}</p>
+        <div className="rounded-xl border border-ink-100/70 bg-white/90 px-4 py-2 text-sm shadow-soft">
+          <p className="font-semibold text-ink-900">{payload[0].name}</p>
+          <p className="text-teal-700 font-semibold">{formatCurrency(payload[0].value)}</p>
         </div>
       );
     }
@@ -41,14 +41,14 @@ export const FinancialOverviewChart: React.FC = () => {
   };
 
   return (
-    <section className="bg-white rounded-lg shadow-md p-6 mb-6 h-full flex flex-col">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Financial Overview</h2>
+    <section className="card card-pad mb-6 h-full flex flex-col">
+      <h2 className="section-title font-heading mb-4">Financial Overview</h2>
       
       {chartData.length === 0 ? (
-        <div className="flex items-center justify-center flex-1 text-gray-500">
+        <div className="flex items-center justify-center flex-1 text-ink-500">
           <div className="text-center">
             <svg
-              className="mx-auto h-12 w-12 text-gray-400 mb-3"
+              className="mx-auto h-12 w-12 text-ink-400 mb-3"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -60,8 +60,8 @@ export const FinancialOverviewChart: React.FC = () => {
                 d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
               />
             </svg>
-            <p className="text-lg">No financial data yet</p>
-            <p className="text-sm mt-1">Add income, expenses, or savings to see the overview</p>
+            <p className="text-lg font-semibold text-ink-800">No financial data yet</p>
+            <p className="text-sm mt-1">Add income, bills, or savings to see the overview</p>
           </div>
         </div>
       ) : (
@@ -92,27 +92,27 @@ export const FinancialOverviewChart: React.FC = () => {
           {/* Summary Cards */}
           <div className="grid grid-cols-2 gap-2 mt-3">
             {totalDebt > 0 && (
-              <div className="bg-red-50 p-2 rounded-lg">
-                <p className="text-xs text-gray-600">Debt</p>
-                <p className="text-sm font-bold text-red-600">{formatCurrency(totalDebt)}</p>
+              <div className="rounded-xl border border-rose-200/60 bg-rose-50/70 p-2">
+                <p className="text-xs text-ink-500">Debt</p>
+                <p className="text-sm font-semibold text-rose-700">{formatCurrency(totalDebt)}</p>
               </div>
             )}
             {totalBills > 0 && (
-              <div className="bg-orange-50 p-2 rounded-lg">
-                <p className="text-xs text-gray-600">Bills</p>
-                <p className="text-sm font-bold text-orange-600">{formatCurrency(totalBills)}</p>
+              <div className="rounded-xl border border-amber-200/60 bg-amber-50/70 p-2">
+                <p className="text-xs text-ink-500">Bills</p>
+                <p className="text-sm font-semibold text-amber-700">{formatCurrency(totalBills)}</p>
               </div>
             )}
             {totalSavings > 0 && (
-              <div className="bg-green-50 p-2 rounded-lg">
-                <p className="text-xs text-gray-600">Savings</p>
-                <p className="text-sm font-bold text-green-600">{formatCurrency(totalSavings)}</p>
+              <div className="rounded-xl border border-teal-200/60 bg-teal-50/70 p-2">
+                <p className="text-xs text-ink-500">Savings</p>
+                <p className="text-sm font-semibold text-teal-700">{formatCurrency(totalSavings)}</p>
               </div>
             )}
             {totalExpenses > 0 && (
-              <div className="bg-purple-50 p-2 rounded-lg">
-                <p className="text-xs text-gray-600">Expenses</p>
-                <p className="text-sm font-bold text-purple-600">{formatCurrency(totalExpenses)}</p>
+              <div className="rounded-xl border border-ink-200/60 bg-ink-50/70 p-2">
+                <p className="text-xs text-ink-500">Expenses</p>
+                <p className="text-sm font-semibold text-ink-800">{formatCurrency(totalExpenses)}</p>
               </div>
             )}
           </div>

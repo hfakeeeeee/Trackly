@@ -29,34 +29,34 @@ export const Overview: React.FC = () => {
   };
 
   return (
-    <section className="bg-white rounded-lg shadow-md p-6 mb-6 h-full flex flex-col">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Overview</h2>
+    <section className="card card-pad mb-6 h-full flex flex-col">
+      <h2 className="section-title font-heading mb-4">Overview</h2>
       <div className="space-y-4 flex-1 flex flex-col justify-center">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+          <label className="block text-xs font-semibold uppercase tracking-wide text-ink-500 mb-2">Start Date</label>
           <input
             type="date"
             value={periodSettings.startDate}
             onChange={handleStartDateChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="input"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+          <label className="block text-xs font-semibold uppercase tracking-wide text-ink-500 mb-2">End Date</label>
           <input
             type="date"
             value={periodSettings.endDate}
             onChange={handleEndDateChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="input"
           />
         </div>
-        <div className="bg-primary-50 rounded-lg p-4">
-          <p className="text-sm text-gray-600 mb-1">Days Remaining</p>
-          <p className="text-3xl font-bold text-primary-700">{daysRemaining}</p>
+        <div className="rounded-xl border border-ink-100/70 bg-sand-50/70 p-4">
+          <p className="text-xs uppercase tracking-wide text-ink-500 mb-1">Days Remaining</p>
+          <p className="text-3xl font-semibold text-ink-900">{daysRemaining}</p>
         </div>
-        <div className="bg-green-50 rounded-lg p-4">
-          <p className="text-sm text-gray-600 mb-1">Daily Allowance</p>
-          <p className={`text-2xl font-bold ${dailyAllowance < 0 ? 'text-red-600' : 'text-green-600'}`}>
+        <div className="rounded-xl border border-teal-200/60 bg-teal-50/60 p-4">
+          <p className="text-xs uppercase tracking-wide text-ink-500 mb-1">Daily Allowance</p>
+          <p className={`text-2xl font-semibold ${dailyAllowance < 0 ? 'text-rose-600' : 'text-teal-700'}`}>
             {formatCurrency(dailyAllowance)}
           </p>
         </div>

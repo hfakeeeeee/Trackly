@@ -24,25 +24,41 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-gradient-to-r from-primary-600 to-primary-800 text-white shadow-lg">
-      <div className="px-8 py-8">
-        <h1 className="text-3xl font-bold mb-6">{currentMonth}</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-            <p className="text-sm opacity-90 mb-1">Total Income</p>
-            <p className="text-2xl font-bold">{formatCurrency(totalIncome)}</p>
+    <header className="relative overflow-hidden bg-ink-900 text-white shadow-float">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-24 left-10 h-60 w-60 rounded-full bg-teal-500/30 blur-3xl animate-slow-float" />
+        <div className="absolute -top-16 right-12 h-72 w-72 rounded-full bg-amber-400/30 blur-3xl animate-slow-float" />
+        <div className="absolute -left-1/3 top-10 h-12 w-2/3 rotate-2 bg-gradient-to-r from-transparent via-white/15 to-transparent blur-xl animate-shimmer" />
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-ink-900/70 to-transparent" />
+      </div>
+      <div className="relative px-6 py-10 sm:px-10 animate-fade-in">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="pill inline-block bg-white/15 text-white">Monthly Snapshot</p>
+            <h1 className="mt-3 font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
+              {currentMonth}
+            </h1>
           </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-            <p className="text-sm opacity-90 mb-1">Total Savings</p>
-            <p className="text-2xl font-bold">{formatCurrency(totalSavings)}</p>
+          <div className="text-sm text-white/70">
+            Trackly keeps your month on course.
           </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-            <p className="text-sm opacity-90 mb-1">Total Money Spent</p>
-            <p className="text-2xl font-bold">{formatCurrency(totalSpend)}</p>
+        </div>
+        <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="stat-card">
+            <p className="text-xs uppercase tracking-wide text-white/70">Total Income</p>
+            <p className="mt-2 text-2xl font-semibold">{formatCurrency(totalIncome)}</p>
           </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-            <p className="text-sm opacity-90 mb-1">Remaining Amount</p>
-            <p className={`text-2xl font-bold ${remainingAmount < 0 ? 'text-red-300' : ''}`}>
+          <div className="stat-card">
+            <p className="text-xs uppercase tracking-wide text-white/70">Total Savings</p>
+            <p className="mt-2 text-2xl font-semibold">{formatCurrency(totalSavings)}</p>
+          </div>
+          <div className="stat-card">
+            <p className="text-xs uppercase tracking-wide text-white/70">Total Money Spent</p>
+            <p className="mt-2 text-2xl font-semibold">{formatCurrency(totalSpend)}</p>
+          </div>
+          <div className="stat-card">
+            <p className="text-xs uppercase tracking-wide text-white/70">Remaining Amount</p>
+            <p className={`mt-2 text-2xl font-semibold ${remainingAmount < 0 ? 'text-rose-200' : 'text-white'}`}>
               {formatCurrency(remainingAmount)}
             </p>
           </div>

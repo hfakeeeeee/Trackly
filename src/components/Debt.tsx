@@ -60,32 +60,32 @@ export const Debt: React.FC = () => {
     const item = debts[index];
     
     return (
-      <tr key={index} className="border-b border-gray-200 hover:bg-gray-50">
-        <td className="py-2 px-2 border-r border-gray-200">
+      <tr key={index} className="table-row">
+        <td className="py-2 px-3 border-r border-ink-100/70">
           <input
             type="text"
             value={item?.description || ''}
             onChange={(e) => handleCellChange(index, 'description', e.target.value)}
-            className="w-full px-2 py-1 border-0 focus:outline-none focus:ring-1 focus:ring-primary-500 rounded bg-transparent"
+            className="input-ghost"
             placeholder="Enter description"
           />
         </td>
-        <td className="py-2 px-2 border-r border-gray-200">
+        <td className="py-2 px-3 border-r border-ink-100/70">
           <input
             type="date"
             value={item?.date || ''}
             onClick={(e) => e.currentTarget.showPicker && e.currentTarget.showPicker()}
             onChange={(e) => handleCellChange(index, 'date', e.target.value)}
-            className="w-full px-2 py-1 border-0 focus:outline-none focus:ring-1 focus:ring-primary-500 rounded bg-transparent [&::-webkit-calendar-picker-indicator]:hidden [&:not(:focus):invalid]:text-transparent"
+            className="input-ghost [&::-webkit-calendar-picker-indicator]:hidden [&:not(:focus):invalid]:text-transparent"
           />
         </td>
-        <td className="py-2 px-2">
+        <td className="py-2 px-3">
           <input
             type="number"
             step="1"
             value={item?.amount || ''}
             onChange={(e) => handleCellChange(index, 'amount', e.target.value)}
-            className="w-full px-2 py-1 border-0 focus:outline-none focus:ring-1 focus:ring-primary-500 rounded text-right bg-transparent"
+            className="input-ghost text-right tabular-nums"
             placeholder="0"
           />
         </td>
@@ -94,33 +94,33 @@ export const Debt: React.FC = () => {
   };
 
   return (
-    <section className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-800">Debt</h2>
+    <section className="card card-pad mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <h2 className="section-title font-heading">Debt</h2>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setMaxRows(maxRows + 5)}
-            className="bg-primary-600 text-white p-2 rounded-md hover:bg-primary-700 transition-colors"
-            title="Add 5 more rows"
+            onClick={() => setMaxRows(maxRows + 1)}
+            className="btn-ghost"
+            title="Add 1 more row"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
           </button>
-          <div className="bg-red-100 px-4 py-2 rounded-lg">
-            <span className="text-sm text-gray-600">Total: </span>
-            <span className="text-lg font-bold text-red-700">{formatCurrency(totalDebt)}</span>
+          <div className="rounded-full border border-rose-200/60 bg-rose-50/70 px-4 py-2">
+            <span className="text-xs uppercase tracking-wide text-ink-500">Total</span>
+            <span className="ml-2 text-sm font-semibold text-rose-700">{formatCurrency(totalDebt)}</span>
           </div>
         </div>
       </div>
 
-      <div className="overflow-x-auto border border-gray-300 rounded">
+      <div className="table-shell">
         <table className="w-full">
-          <thead>
-            <tr className="border-b-2 border-gray-300">
-              <th className="text-left py-3 px-2 font-semibold text-gray-700 border-r border-gray-200">Description</th>
-              <th className="text-center py-3 px-2 font-semibold text-gray-700 w-32 border-r border-gray-200">Due Date</th>
-              <th className="text-right py-3 px-2 font-semibold text-gray-700 w-32">Amount</th>
+          <thead className="table-head">
+            <tr className="border-b border-ink-100/80">
+              <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 border-r border-ink-100/70">Description</th>
+              <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-32 border-r border-ink-100/70">Due Date</th>
+              <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-40">Amount</th>
             </tr>
           </thead>
           <tbody>

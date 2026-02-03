@@ -3,14 +3,14 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 import { useApp } from '../AppContext';
 
 const COLORS = [
-  '#0ea5e9', // primary blue
-  '#10b981', // green
-  '#f59e0b', // orange
-  '#ef4444', // red
-  '#8b5cf6', // purple
-  '#ec4899', // pink
-  '#06b6d4', // cyan
-  '#84cc16', // lime
+  '#14b8a6', // teal
+  '#f97316', // amber
+  '#f43f5e', // rose
+  '#7c3aed', // violet
+  '#22c55e', // green
+  '#0ea5e9', // sky
+  '#facc15', // gold
+  '#64748b', // slate
 ];
 
 export const ExpenseChart: React.FC = () => {
@@ -35,9 +35,9 @@ export const ExpenseChart: React.FC = () => {
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white px-4 py-2 rounded-lg shadow-lg border border-gray-200">
-          <p className="font-semibold text-gray-800">{payload[0].name}</p>
-          <p className="text-primary-600 font-bold">{formatCurrency(payload[0].value)}</p>
+        <div className="rounded-xl border border-ink-100/70 bg-white/90 px-4 py-2 text-sm shadow-soft">
+          <p className="font-semibold text-ink-900">{payload[0].name}</p>
+          <p className="text-teal-700 font-semibold">{formatCurrency(payload[0].value)}</p>
         </div>
       );
     }
@@ -45,14 +45,14 @@ export const ExpenseChart: React.FC = () => {
   };
 
   return (
-    <section className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Expense Distribution</h2>
+    <section className="card card-pad mb-6">
+      <h2 className="section-title font-heading mb-4">Expense Distribution</h2>
       
       {chartData.length === 0 ? (
-        <div className="flex items-center justify-center h-96 text-gray-500">
+        <div className="flex items-center justify-center h-96 text-ink-500">
           <div className="text-center">
             <svg
-              className="mx-auto h-12 w-12 text-gray-400 mb-3"
+              className="mx-auto h-12 w-12 text-ink-400 mb-3"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -70,8 +70,8 @@ export const ExpenseChart: React.FC = () => {
                 d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"
               />
             </svg>
-            <p className="text-lg">No expense data to display</p>
-            <p className="text-sm mt-1">Add some expenses to see the chart</p>
+            <p className="text-lg font-semibold text-ink-800">No expense data yet</p>
+            <p className="text-sm mt-1">Add expenses to unlock the distribution view</p>
           </div>
         </div>
       ) : (
