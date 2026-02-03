@@ -269,7 +269,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const getRemainingAmount = () => {
-    return getTotalIncome() - getTotalSavings() - getTotalExpenses();
+    const totalDebts = state.debts.reduce((sum, item) => sum + item.amount, 0);
+    const totalBills = state.bills.reduce((sum, item) => sum + item.amount, 0);
+    return getTotalIncome() - getTotalSavings() - getTotalExpenses() - totalDebts - totalBills;
   };
 
   return (
