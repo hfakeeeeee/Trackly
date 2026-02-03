@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useApp } from '../AppContext';
+import { ConfirmToast } from './ConfirmToast';
 
 export const CategoryManager: React.FC = () => {
   const { categories, addCategory, updateCategory, removeCategory } = useApp();
   const [newCategory, setNewCategory] = useState('');
   const [showAddCategory, setShowAddCategory] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const MIN_ROWS = 50;
 
   const handleAddCategory = () => {
@@ -32,16 +34,19 @@ export const CategoryManager: React.FC = () => {
 
   const handleClearAll = () => {
     if (categories.length === 0) return;
-    const confirmed = window.confirm('Clear all category rows?');
-    if (!confirmed) return;
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmClearAll = () => {
     categories.forEach((cat) => removeCategory(cat.id));
+    setConfirmOpen(false);
   };
 
   return (
     <section className="card card-pad mb-6 h-full flex flex-col">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <h2 className="section-title font-heading">Categories</h2>
-        <div className="flex items-center gap-2">
+        <div className="relative flex items-center gap-2">
           <button
             onClick={handleClearAll}
             className="btn-ghost text-rose-600 hover:text-rose-700"
@@ -64,6 +69,14 @@ export const CategoryManager: React.FC = () => {
               </svg>
             )}
           </button>
+          <ConfirmToast
+            open={confirmOpen}
+            message="Clear all category rows?"
+            confirmLabel="Clear All"
+            positionClassName="absolute right-0 top-full mt-2 z-50"
+            onCancel={() => setConfirmOpen(false)}
+            onConfirm={handleConfirmClearAll}
+          />
         </div>
       </div>
 

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useApp } from '../AppContext';
+import { ConfirmToast } from './ConfirmToast';
 
 export const ExpenseTracker: React.FC = () => {
   const { expenses, categories, addExpense, removeExpense, updateExpense } = useApp();
   const [maxRows, setMaxRows] = useState(50);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -66,9 +68,12 @@ export const ExpenseTracker: React.FC = () => {
 
   const handleClearAll = () => {
     if (expenses.length === 0) return;
-    const confirmed = window.confirm('Clear all expense rows?');
-    if (!confirmed) return;
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmClearAll = () => {
     expenses.forEach((item) => removeExpense(item.id));
+    setConfirmOpen(false);
   };
 
   const renderRow = (index: number) => {
@@ -104,7 +109,7 @@ export const ExpenseTracker: React.FC = () => {
             placeholder="0"
           />
         </td>
-        <td className="py-2 px-3">
+        <td className="py-2 px-3 border-r border-ink-100/70">
           <select
             value={item?.category || ''}
             onChange={(e) => handleCellChange(index, 'category', e.target.value)}
@@ -139,7 +144,7 @@ export const ExpenseTracker: React.FC = () => {
     <section className="card card-pad mb-6 h-full flex flex-col">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <h2 className="section-title font-heading">Expense Tracker</h2>
-        <div className="flex items-center gap-3">
+        <div className="relative flex items-center gap-3">
           <button
             onClick={() => setMaxRows(maxRows + 1)}
             className="btn-ghost group transition-transform duration-200 hover:scale-105 active:scale-95"
@@ -160,6 +165,14 @@ export const ExpenseTracker: React.FC = () => {
             <span className="text-xs uppercase tracking-wide text-ink-500">Total</span>
             <span className="ml-2 text-sm font-semibold text-ink-800">{formatCurrency(totalExpenses)}</span>
           </div>
+          <ConfirmToast
+            open={confirmOpen}
+            message="Clear all expense rows?"
+            confirmLabel="Clear All"
+            positionClassName="absolute right-0 top-full mt-2 z-50"
+            onCancel={() => setConfirmOpen(false)}
+            onConfirm={handleConfirmClearAll}
+          />
         </div>
       </div>
 
@@ -170,7 +183,7 @@ export const ExpenseTracker: React.FC = () => {
               <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-32 border-r border-ink-100/70">Date</th>
               <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 border-r border-ink-100/70">Description</th>
               <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-40 border-r border-ink-100/70">Amount</th>
-              <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-56">Category</th>
+              <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-56 border-r border-ink-100/70">Category</th>
               <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-16">Action</th>
             </tr>
           </thead>
