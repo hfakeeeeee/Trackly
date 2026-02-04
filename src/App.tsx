@@ -68,8 +68,8 @@ function AppContent() {
             <div className="absolute left-36 top-18 h-3.5 w-3.5 rounded-full bg-teal-300 shadow-[0_0_14px_rgba(20,184,166,0.55)] [animation:coin-arc_3s_infinite]" />
           </div>
           <div className="text-center">
-            <p className="text-xs uppercase tracking-[0.4em] text-ink-500 animate-pulse">Counting</p>
-            <p className="mt-2 text-sm text-ink-600">Money is flying out of the wallet</p>
+            <p className="text-xs uppercase tracking-[0.4em] text-ink-500 animate-pulse">Loading</p>
+            <p className="mt-2 text-sm text-ink-600">Checking your wallet...</p>
           </div>
         </div>
       </div>
