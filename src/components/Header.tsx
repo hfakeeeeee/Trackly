@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../AppContext';
-import { format } from 'date-fns';
+import { addDays, format, isAfter, parseISO, startOfDay } from 'date-fns';
 import { t } from '../i18n';
 
 export const Header: React.FC = () => {
@@ -24,7 +24,38 @@ export const Header: React.FC = () => {
   } = useApp();
   const { language, theme } = uiSettings;
 
-  const currentMonth = format(new Date(periodSettings.startDate), 'MMMM yyyy');
+  const getDominantMonthLabel = (startDate: string, endDate: string) => {
+    const start = startOfDay(parseISO(startDate));
+    const end = startOfDay(parseISO(endDate));
+    if (isAfter(start, end)) {
+      return format(start, 'MMMM yyyy');
+    }
+
+    const counts = new Map<string, { count: number; label: string }>();
+    let cursor = start;
+    while (!isAfter(cursor, end)) {
+      const key = format(cursor, 'yyyy-MM');
+      const label = format(cursor, 'MMMM yyyy');
+      const entry = counts.get(key);
+      if (entry) {
+        entry.count += 1;
+      } else {
+        counts.set(key, { count: 1, label });
+      }
+      cursor = addDays(cursor, 1);
+    }
+
+    let winner: { count: number; label: string } | null = null;
+    for (const entry of counts.values()) {
+      if (!winner || entry.count > winner.count) {
+        winner = entry;
+      }
+    }
+
+    return winner ? winner.label : format(start, 'MMMM yyyy');
+  };
+
+  const currentMonth = getDominantMonthLabel(periodSettings.startDate, periodSettings.endDate);
   const totalIncome = getTotalIncome();
   const totalSavings = getTotalSavings();
   const totalExpenses = getTotalExpenses();
