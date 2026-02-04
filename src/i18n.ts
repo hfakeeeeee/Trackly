@@ -61,6 +61,8 @@ const translations = {
     addSheet: 'Add Sheet',
     newSheetName: 'New sheet name',
     renameSheet: 'Rename sheet',
+    removeSheet: 'Remove sheet',
+    confirmRemoveSheet: 'Remove this sheet?',
   },
   vi: {
     monthlySnapshot: 'Tổng quan tháng',
@@ -122,6 +124,8 @@ const translations = {
     addSheet: 'Thêm trang',
     newSheetName: 'Tên trang mới',
     renameSheet: 'Đổi tên trang',
+    removeSheet: 'Xoa trang',
+    confirmRemoveSheet: 'Xoa trang nay?',
   },
 } as const;
 

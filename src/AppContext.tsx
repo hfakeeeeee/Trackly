@@ -6,6 +6,7 @@ interface AppContextType extends AppState, Sheet {
   setCurrentSheet: (id: string) => void;
   addSheet: (name?: string) => void;
   renameSheet: (id: string, name: string) => void;
+  removeSheet: (id: string) => void;
   addIncome: (item: Omit<IncomeItem, 'id'>) => void;
   removeIncome: (id: string) => void;
   updateIncome: (id: string, item: Partial<Omit<IncomeItem, 'id'>>) => void;
@@ -167,6 +168,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         sheet.id === id ? { ...sheet, name: trimmedName } : sheet
       ),
     }));
+  };
+
+  const removeSheet = (id: string) => {
+    setState(prev => {
+      if (prev.sheets.length <= 1) return prev;
+      const remainingSheets = prev.sheets.filter(sheet => sheet.id !== id);
+      if (remainingSheets.length === prev.sheets.length) return prev;
+      const nextSheetId = prev.currentSheetId === id ? remainingSheets[0].id : prev.currentSheetId;
+      return {
+        ...prev,
+        sheets: remainingSheets,
+        currentSheetId: nextSheetId,
+      };
+    });
   };
 
   const addIncome = (item: Omit<IncomeItem, 'id'>) => {
@@ -501,6 +516,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setCurrentSheet,
         addSheet,
         renameSheet,
+        removeSheet,
         addIncome,
         removeIncome,
         updateIncome,

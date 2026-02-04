@@ -20,6 +20,7 @@ export const Header: React.FC = () => {
     setCurrentSheet,
     addSheet,
     renameSheet,
+    removeSheet,
   } = useApp();
   const { language, theme } = uiSettings;
 
@@ -88,6 +89,21 @@ export const Header: React.FC = () => {
               >
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 11l6.232-6.232a2 2 0 012.828 0l1.172 1.172a2 2 0 010 2.828L13 15H9v-4z" />
+                </svg>
+              </button>
+              <button
+                onClick={() => {
+                  if (sheets.length <= 1) return;
+                  if (window.confirm(t(language, 'confirmRemoveSheet'))) {
+                    removeSheet(currentSheetId);
+                  }
+                }}
+                className="rounded-full bg-ink-900/10 px-2 py-1 text-xs font-semibold text-ink-800 transition hover:bg-ink-900/20 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white/15 dark:text-white dark:hover:bg-white/25"
+                title={t(language, 'removeSheet')}
+                disabled={sheets.length <= 1}
+              >
+                <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path d="M6 2a1 1 0 00-1 1v1H3.5a.5.5 0 000 1h13a.5.5 0 000-1H15V3a1 1 0 00-1-1H6zM4.5 6h11l-.74 10.36A2 2 0 0112.76 18H7.24a2 2 0 01-1.99-1.64L4.5 6z" />
                 </svg>
               </button>
               <button
