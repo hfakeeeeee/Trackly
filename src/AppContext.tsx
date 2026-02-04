@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import type firebase from 'firebase/compat/app';
+import { User, createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { AppState, IncomeItem, DebtItem, SavingsItem, BillItem, ExpenseItem, Sheet, AllowanceSnapshot } from './types';
 import { auth, db } from './firebase';
 
@@ -33,7 +34,7 @@ interface AppContextType extends AppState, Sheet {
   getTotalExpenses: () => number;
   getRemainingAmount: () => number;
   setDailyAllowanceSnapshot: (snapshot: AllowanceSnapshot) => void;
-  user: firebase.User | null;
+  user: User | null;
   authLoading: boolean;
   dataLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
@@ -126,14 +127,14 @@ const buildStateFromData = (parsed?: Partial<AppState> & Partial<Sheet>): AppSta
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, setState] = useState<AppState>(() => createDefaultState());
-  const [user, setUser] = useState<firebase.User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [dataLoading, setDataLoading] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [themeTransitionId, setThemeTransitionId] = useState(0);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async authUser => {
+    const unsubscribe = onAuthStateChanged(auth, async authUser => {
       setUser(authUser);
       if (!authUser) {
         setState(createDefaultState());
@@ -145,13 +146,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
       setDataLoading(true);
       try {
-        const ref = db.collection('users').doc(authUser.uid);
-        const snap = await ref.get();
-        if (snap.exists) {
+        const ref = doc(db, 'users', authUser.uid);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
           setState(buildStateFromData(snap.data() as Partial<AppState> & Partial<Sheet>));
         } else {
           const initialState = createDefaultState();
-          await ref.set(initialState);
+          await setDoc(ref, initialState);
           setState(initialState);
         }
         setHydrated(true);
@@ -168,7 +169,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   useEffect(() => {
     if (!user || !hydrated) return;
-    db.collection('users').doc(user.uid).set(state);
+    const ref = doc(db, 'users', user.uid);
+    setDoc(ref, state);
   }, [hydrated, state, user]);
 
   useEffect(() => {
@@ -528,15 +530,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const signIn = async (email: string, password: string) => {
-    await auth.signInWithEmailAndPassword(email, password);
+    await signInWithEmailAndPassword(auth, email, password);
   };
 
   const register = async (email: string, password: string) => {
-    await auth.createUserWithEmailAndPassword(email, password);
+    await createUserWithEmailAndPassword(auth, email, password);
   };
 
   const signOut = async () => {
-    await auth.signOut();
+    await firebaseSignOut(auth);
   };
 
   const toggleTheme = (origin?: { x: number; y: number }) => {
