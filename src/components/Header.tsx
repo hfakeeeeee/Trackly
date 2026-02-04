@@ -21,6 +21,8 @@ export const Header: React.FC = () => {
     addSheet,
     renameSheet,
     removeSheet,
+    user,
+    signOut,
   } = useApp();
   const { language, theme } = uiSettings;
 
@@ -170,6 +172,18 @@ export const Header: React.FC = () => {
                 title={language === 'en' ? 'Tiếng Việt' : 'English'}
               >
                 {language === 'en' ? 'EN' : 'VI'}
+              </button>
+            </div>
+            <div className="flex items-center gap-2 rounded-full border border-ink-900/10 bg-white/70 px-2 py-1 dark:border-white/20 dark:bg-white/10">
+              <span className="text-xs uppercase tracking-wide text-ink-500 dark:text-white/60">
+                {user?.email ?? 'User'}
+              </span>
+              <button
+                onClick={() => signOut()}
+                className="inline-flex items-center gap-1 rounded-full bg-ink-900/10 px-2 py-1 text-xs font-semibold text-ink-800 transition hover:bg-ink-900/20 dark:bg-white/15 dark:text-white dark:hover:bg-white/25"
+                title={t(language, 'signOut')}
+              >
+                {t(language, 'signOut')}
               </button>
             </div>
           </div>

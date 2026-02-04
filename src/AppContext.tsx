@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { User, createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { AppState, IncomeItem, DebtItem, SavingsItem, BillItem, ExpenseItem, Sheet, AllowanceSnapshot } from './types';
+import { auth, db } from './firebase';
 
 interface AppContextType extends AppState, Sheet {
   currentSheet: Sheet;
@@ -31,6 +34,12 @@ interface AppContextType extends AppState, Sheet {
   getTotalExpenses: () => number;
   getRemainingAmount: () => number;
   setDailyAllowanceSnapshot: (snapshot: AllowanceSnapshot) => void;
+  user: User | null;
+  authLoading: boolean;
+  dataLoading: boolean;
+  signIn: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
   themeTransitionId: number;
   setTheme: (theme: 'light' | 'dark') => void;
   toggleTheme: (origin?: { x: number; y: number }) => void;
@@ -38,8 +47,6 @@ interface AppContextType extends AppState, Sheet {
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
-
-const STORAGE_KEY = 'trackly-data';
 
 const defaultCategories = [
   { id: '1', name: 'Food & Dining', total: 0 },
@@ -66,67 +73,105 @@ const createDefaultSheet = (name: string): Sheet => ({
   allowanceSnapshot: undefined,
 });
 
-const defaultSheet = createDefaultSheet('Current Month');
+const createDefaultState = (): AppState => {
+  const defaultSheet = createDefaultSheet('Current Month');
+  return {
+    sheets: [defaultSheet],
+    currentSheetId: defaultSheet.id,
+    uiSettings: {
+      theme: 'light',
+      language: 'en',
+    },
+  };
+};
 
-const defaultState: AppState = {
-  sheets: [defaultSheet],
-  currentSheetId: defaultSheet.id,
-  uiSettings: {
-    theme: 'light',
-    language: 'en',
-  },
+const buildStateFromData = (parsed?: Partial<AppState> & Partial<Sheet>): AppState => {
+  const baseState = createDefaultState();
+  if (parsed?.sheets && parsed.sheets.length > 0) {
+    return {
+      ...baseState,
+      ...parsed,
+      currentSheetId: parsed.currentSheetId ?? parsed.sheets[0].id,
+      uiSettings: {
+        ...baseState.uiSettings,
+        ...(parsed.uiSettings ?? {}),
+      },
+    };
+  }
+
+  if (!parsed) return baseState;
+
+  const legacySheet: Sheet = {
+    id: baseState.sheets[0].id,
+    name: 'Current Month',
+    periodSettings: parsed.periodSettings ?? baseState.sheets[0].periodSettings,
+    income: parsed.income ?? [],
+    debts: parsed.debts ?? [],
+    savings: parsed.savings ?? [],
+    bills: parsed.bills ?? [],
+    expenses: parsed.expenses ?? [],
+    categories: parsed.categories ?? defaultCategories.map(cat => ({ ...cat })),
+    allowanceSnapshot: parsed.allowanceSnapshot,
+  };
+
+  return {
+    ...baseState,
+    sheets: [legacySheet],
+    currentSheetId: legacySheet.id,
+    uiSettings: {
+      ...baseState.uiSettings,
+      ...(parsed.uiSettings ?? {}),
+    },
+  };
 };
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [state, setState] = useState<AppState>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved) as Partial<AppState> & Partial<Sheet>;
-        if (parsed.sheets && parsed.sheets.length > 0) {
-          return {
-            ...defaultState,
-            ...parsed,
-            currentSheetId: parsed.currentSheetId ?? parsed.sheets[0].id,
-            uiSettings: {
-              ...defaultState.uiSettings,
-              ...(parsed.uiSettings ?? {}),
-            },
-          };
-        }
-
-        // Migrate legacy single-sheet data into sheets array
-        const legacySheet: Sheet = {
-          id: defaultSheet.id,
-          name: 'Current Month',
-          periodSettings: parsed.periodSettings ?? defaultSheet.periodSettings,
-          income: parsed.income ?? [],
-          debts: parsed.debts ?? [],
-          savings: parsed.savings ?? [],
-          bills: parsed.bills ?? [],
-          expenses: parsed.expenses ?? [],
-          categories: parsed.categories ?? defaultCategories.map(cat => ({ ...cat })),
-        };
-
-        return {
-          sheets: [legacySheet],
-          currentSheetId: legacySheet.id,
-          uiSettings: {
-            ...defaultState.uiSettings,
-            ...(parsed.uiSettings ?? {}),
-          },
-        };
-      } catch {
-        return defaultState;
-      }
-    }
-    return defaultState;
-  });
+  const [state, setState] = useState<AppState>(() => createDefaultState());
+  const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const [themeTransitionId, setThemeTransitionId] = useState(0);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [state]);
+    const unsubscribe = onAuthStateChanged(auth, async authUser => {
+      setUser(authUser);
+      if (!authUser) {
+        setState(createDefaultState());
+        setDataLoading(false);
+        setHydrated(false);
+        setAuthLoading(false);
+        return;
+      }
+
+      setDataLoading(true);
+      try {
+        const ref = doc(db, 'users', authUser.uid);
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+          setState(buildStateFromData(snap.data() as Partial<AppState> & Partial<Sheet>));
+        } else {
+          const initialState = createDefaultState();
+          await setDoc(ref, initialState);
+          setState(initialState);
+        }
+        setHydrated(true);
+      } catch {
+        setState(createDefaultState());
+      } finally {
+        setDataLoading(false);
+        setAuthLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!user || !hydrated) return;
+    const ref = doc(db, 'users', user.uid);
+    setDoc(ref, state);
+  }, [hydrated, state, user]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -484,6 +529,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }));
   };
 
+  const signIn = async (email: string, password: string) => {
+    await signInWithEmailAndPassword(auth, email, password);
+  };
+
+  const register = async (email: string, password: string) => {
+    await createUserWithEmailAndPassword(auth, email, password);
+  };
+
+  const signOut = async () => {
+    await firebaseSignOut(auth);
+  };
+
   const toggleTheme = (origin?: { x: number; y: number }) => {
     setThemeTransitionId(prev => prev + 1);
     if (origin) {
@@ -541,6 +598,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         getTotalExpenses,
         getRemainingAmount,
         setDailyAllowanceSnapshot,
+        user,
+        authLoading,
+        dataLoading,
+        signIn,
+        register,
+        signOut,
         themeTransitionId,
         setTheme,
         toggleTheme,

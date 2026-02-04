@@ -12,9 +12,23 @@ import { CategoryManager } from './components/CategoryManager';
 import { Footer } from './components/Footer';
 import { ThemeWipe } from './components/ThemeWipe';
 import { useApp } from './AppContext';
+import { AuthScreen } from './components/AuthScreen';
 
 function AppContent() {
-  const { themeTransitionId } = useApp();
+  const { themeTransitionId, user, authLoading, dataLoading } = useApp();
+
+  if (authLoading || (user && dataLoading)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-ink-900 dark:text-ink-100">
+        <span className="text-sm font-semibold uppercase tracking-wide">Loading...</span>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthScreen />;
+  }
+
   return (
     <div className="min-h-screen text-ink-900 dark:text-ink-100">
       <ThemeWipe transitionId={themeTransitionId} />
