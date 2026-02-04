@@ -14,6 +14,16 @@ export const Overview: React.FC = () => {
   } = useApp();
   const { language } = uiSettings;
 
+  const toNumber = (value: unknown) => {
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    if (typeof value === 'string') {
+      const cleaned = value.replace(/[^\d-]/g, '');
+      const parsed = Number(cleaned);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+    return 0;
+  };
+
   const today = new Date();
   const todayKey = format(today, 'yyyy-MM-dd');
   const startDate = new Date(periodSettings.startDate);
@@ -22,22 +32,18 @@ export const Overview: React.FC = () => {
   const remainingAmount = getRemainingAmount();
   const safeRemainingAmount = Number.isFinite(remainingAmount) ? remainingAmount : 0;
   const computedDailyAllowance = daysRemaining > 0 ? safeRemainingAmount / daysRemaining : 0;
-  const dailyAllowance =
+  const roundedComputedDaily = Math.round(computedDailyAllowance);
+  const snapshotAmount =
     currentSheet.allowanceSnapshot?.date === todayKey
-      ? currentSheet.allowanceSnapshot.amount
-      : computedDailyAllowance;
+      ? toNumber(currentSheet.allowanceSnapshot.amount)
+      : undefined;
+  const snapshotRounded = snapshotAmount !== undefined ? Math.round(snapshotAmount) : undefined;
+  const dailyAllowance =
+    snapshotRounded !== undefined && snapshotRounded !== 0
+      ? snapshotRounded
+      : roundedComputedDaily;
   const nextDayAllowance =
     daysRemaining > 1 ? safeRemainingAmount / (daysRemaining - 1) : 0;
-
-  const toNumber = (value: unknown) => {
-    if (typeof value === 'number' && Number.isFinite(value)) return value;
-    if (typeof value === 'string') {
-      const cleaned = value.replace(/[^\d.-]/g, '');
-      const parsed = Number(cleaned);
-      return Number.isFinite(parsed) ? parsed : 0;
-    }
-    return 0;
-  };
 
   useEffect(() => {
     const totalMagnitude =
@@ -48,16 +54,18 @@ export const Overview: React.FC = () => {
       currentSheet.expenses.reduce((sum, item) => sum + Math.abs(toNumber(item.amount)), 0);
     const hasMeaningfulData = totalMagnitude > 0;
     const snapshotIsToday = currentSheet.allowanceSnapshot?.date === todayKey;
+    const snapshotValue = snapshotIsToday ? toNumber(currentSheet.allowanceSnapshot?.amount) : undefined;
+    const snapshotRoundedValue = snapshotValue !== undefined ? Math.round(snapshotValue) : undefined;
     const shouldRefreshZeroSnapshot =
       snapshotIsToday &&
-      currentSheet.allowanceSnapshot?.amount === 0 &&
-      computedDailyAllowance !== 0;
+      snapshotRoundedValue === 0 &&
+      roundedComputedDaily !== 0;
 
     if (hasMeaningfulData && (!snapshotIsToday || shouldRefreshZeroSnapshot)) {
-      setDailyAllowanceSnapshot({ date: todayKey, amount: computedDailyAllowance });
+      setDailyAllowanceSnapshot({ date: todayKey, amount: roundedComputedDaily });
     }
   }, [
-    computedDailyAllowance,
+    roundedComputedDaily,
     currentSheet.allowanceSnapshot?.date,
     currentSheet.allowanceSnapshot?.amount,
     currentSheet.bills.length,

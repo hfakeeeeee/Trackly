@@ -90,7 +90,7 @@ const createDefaultState = (): AppState => {
 const toNumber = (value: unknown) => {
   if (typeof value === 'number' && Number.isFinite(value)) return value;
   if (typeof value === 'string') {
-    const cleaned = value.replace(/[^\d.-]/g, '');
+    const cleaned = value.replace(/[^\d-]/g, '');
     const parsed = Number(cleaned);
     return Number.isFinite(parsed) ? parsed : 0;
   }
