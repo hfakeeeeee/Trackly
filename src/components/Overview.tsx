@@ -119,7 +119,17 @@ export const Overview: React.FC = () => {
           <p className="text-3xl font-bold text-ink-900 dark:text-ink-100">{daysRemaining}</p>
         </div>
         <div className="rounded-xl border border-teal-200/60 bg-teal-50/60 p-4 dark:border-teal-500/30 dark:bg-teal-500/10">
-          <p className="text-xs uppercase tracking-wide text-ink-500 mb-1 dark:text-ink-300">{t(language, 'dailyAllowance')}</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs uppercase tracking-wide text-ink-500 mb-1 dark:text-ink-300">{t(language, 'dailyAllowance')}</p>
+            <button
+              type="button"
+              onClick={() => setDailyAllowanceSnapshot({ date: todayKey, amount: roundedComputedDaily })}
+              className="text-[10px] uppercase tracking-wide text-teal-700 hover:text-teal-900 dark:text-teal-300 dark:hover:text-teal-200"
+              title={t(language, 'recalcHint')}
+            >
+              {t(language, 'recalcToday')}
+            </button>
+          </div>
           <p className={`text-2xl font-semibold ${dailyAllowance < 0 ? 'text-rose-600 dark:text-rose-300' : 'text-teal-700 dark:text-teal-300'}`}>
             {formatCurrency(dailyAllowance)}
           </p>
