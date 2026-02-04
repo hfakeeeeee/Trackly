@@ -127,6 +127,11 @@ const buildStateFromData = (parsed?: Partial<AppState> & Partial<Sheet>): AppSta
   };
 };
 
+const sanitizeState = (value: AppState) => {
+  // Firestore rejects undefined values; JSON round-trip strips them.
+  return JSON.parse(JSON.stringify(value)) as AppState;
+};
+
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, setState] = useState<AppState>(() => createDefaultState());
   const [user, setUser] = useState<User | null>(null);
@@ -154,7 +159,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           setState(buildStateFromData(snap.data() as Partial<AppState> & Partial<Sheet>));
         } else {
           const initialState = createDefaultState();
-          await setDoc(ref, initialState);
+          await setDoc(ref, sanitizeState(initialState));
           setState(initialState);
         }
         setHydrated(true);
@@ -172,7 +177,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     if (!user || !hydrated) return;
     const ref = doc(db, 'users', user.uid);
-    setDoc(ref, state);
+    setDoc(ref, sanitizeState(state)).catch(() => {
+      // Ignore save errors; auth or network may be temporarily unavailable.
+    });
   }, [hydrated, state, user]);
 
   useEffect(() => {
