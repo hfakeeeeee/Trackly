@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth';
+import { User, createUserWithEmailAndPassword, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { AppState, IncomeItem, DebtItem, SavingsItem, BillItem, ExpenseItem, Sheet, AllowanceSnapshot } from './types';
 import { auth, db } from './firebase';
@@ -39,6 +39,8 @@ interface AppContextType extends AppState, Sheet {
   dataLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
+  sendPasswordReset: (email: string) => Promise<void>;
+  resendVerification: () => Promise<void>;
   signOut: () => Promise<void>;
   themeTransitionId: number;
   setTheme: (theme: 'light' | 'dark') => void;
@@ -534,7 +536,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const register = async (email: string, password: string) => {
-    await createUserWithEmailAndPassword(auth, email, password);
+    const credential = await createUserWithEmailAndPassword(auth, email, password);
+    if (credential.user) {
+      await sendEmailVerification(credential.user);
+    }
+  };
+
+  const sendPasswordReset = async (email: string) => {
+    await sendPasswordResetEmail(auth, email);
+  };
+
+  const resendVerification = async () => {
+    if (auth.currentUser) {
+      await sendEmailVerification(auth.currentUser);
+    }
   };
 
   const signOut = async () => {
@@ -603,6 +618,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         dataLoading,
         signIn,
         register,
+        sendPasswordReset,
+        resendVerification,
         signOut,
         themeTransitionId,
         setTheme,
