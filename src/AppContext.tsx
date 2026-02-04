@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AppState, IncomeItem, DebtItem, SavingsItem, BillItem, ExpenseItem, Sheet } from './types';
+import { AppState, IncomeItem, DebtItem, SavingsItem, BillItem, ExpenseItem, Sheet, AllowanceSnapshot } from './types';
 
 interface AppContextType extends AppState, Sheet {
   currentSheet: Sheet;
@@ -29,6 +29,7 @@ interface AppContextType extends AppState, Sheet {
   getTotalSavings: () => number;
   getTotalExpenses: () => number;
   getRemainingAmount: () => number;
+  setDailyAllowanceSnapshot: (snapshot: AllowanceSnapshot) => void;
   themeTransitionId: number;
   setTheme: (theme: 'light' | 'dark') => void;
   toggleTheme: (origin?: { x: number; y: number }) => void;
@@ -61,6 +62,7 @@ const createDefaultSheet = (name: string): Sheet => ({
   bills: [],
   expenses: [],
   categories: defaultCategories.map(cat => ({ ...cat })),
+  allowanceSnapshot: undefined,
 });
 
 const defaultSheet = createDefaultSheet('Current Month');
@@ -449,6 +451,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return getTotalIncome() - getTotalSavings() - getTotalExpenses() - totalDebts - totalBills;
   };
 
+  const setDailyAllowanceSnapshot = (snapshot: AllowanceSnapshot) => {
+    setState(prev => ({
+      ...prev,
+      sheets: prev.sheets.map(sheet =>
+        sheet.id === prev.currentSheetId
+          ? { ...sheet, allowanceSnapshot: snapshot }
+          : sheet
+      ),
+    }));
+  };
+
   const setTheme = (theme: 'light' | 'dark') => {
     setState(prev => ({
       ...prev,
@@ -511,6 +524,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         getTotalSavings,
         getTotalExpenses,
         getRemainingAmount,
+        setDailyAllowanceSnapshot,
         themeTransitionId,
         setTheme,
         toggleTheme,

@@ -45,6 +45,11 @@ export interface PeriodSettings {
   endDate: string;
 }
 
+export interface AllowanceSnapshot {
+  date: string;
+  amount: number;
+}
+
 export interface AppState {
   sheets: Sheet[];
   currentSheetId: string;
@@ -64,4 +69,5 @@ export interface Sheet {
   bills: BillItem[];
   expenses: ExpenseItem[];
   categories: Category[];
+  allowanceSnapshot?: AllowanceSnapshot;
 }

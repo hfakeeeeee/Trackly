@@ -1,17 +1,61 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useApp } from '../AppContext';
-import { differenceInDays } from 'date-fns';
+import { differenceInDays, format } from 'date-fns';
 import { t } from '../i18n';
 
 export const Overview: React.FC = () => {
-  const { periodSettings, updatePeriod, getRemainingAmount, uiSettings } = useApp();
+  const {
+    periodSettings,
+    updatePeriod,
+    getRemainingAmount,
+    uiSettings,
+    currentSheet,
+    setDailyAllowanceSnapshot,
+  } = useApp();
   const { language } = uiSettings;
 
   const today = new Date();
+  const todayKey = format(today, 'yyyy-MM-dd');
   const endDate = new Date(periodSettings.endDate);
   const daysRemaining = Math.max(0, differenceInDays(endDate, today) + 1);
   const remainingAmount = getRemainingAmount();
-  const dailyAllowance = daysRemaining > 0 ? remainingAmount / daysRemaining : 0;
+  const computedDailyAllowance = daysRemaining > 0 ? remainingAmount / daysRemaining : 0;
+  const dailyAllowance =
+    currentSheet.allowanceSnapshot?.date === todayKey
+      ? currentSheet.allowanceSnapshot.amount
+      : computedDailyAllowance;
+  const nextDayAllowance =
+    daysRemaining > 1 ? remainingAmount / (daysRemaining - 1) : 0;
+
+  useEffect(() => {
+    const totalMagnitude =
+      currentSheet.income.reduce((sum, item) => sum + Math.abs(item.amount || 0), 0) +
+      currentSheet.debts.reduce((sum, item) => sum + Math.abs(item.amount || 0), 0) +
+      currentSheet.savings.reduce((sum, item) => sum + Math.abs(item.amount || 0), 0) +
+      currentSheet.bills.reduce((sum, item) => sum + Math.abs(item.amount || 0), 0) +
+      currentSheet.expenses.reduce((sum, item) => sum + Math.abs(item.amount || 0), 0);
+    const hasMeaningfulData = totalMagnitude > 0;
+    const snapshotIsToday = currentSheet.allowanceSnapshot?.date === todayKey;
+    const shouldRefreshZeroSnapshot =
+      snapshotIsToday &&
+      currentSheet.allowanceSnapshot?.amount === 0 &&
+      computedDailyAllowance !== 0;
+
+    if (hasMeaningfulData && (!snapshotIsToday || shouldRefreshZeroSnapshot)) {
+      setDailyAllowanceSnapshot({ date: todayKey, amount: computedDailyAllowance });
+    }
+  }, [
+    computedDailyAllowance,
+    currentSheet.allowanceSnapshot?.date,
+    currentSheet.allowanceSnapshot?.amount,
+    currentSheet.bills.length,
+    currentSheet.debts.length,
+    currentSheet.expenses.length,
+    currentSheet.income.length,
+    currentSheet.savings.length,
+    setDailyAllowanceSnapshot,
+    todayKey,
+  ]);
 
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     updatePeriod(e.target.value, periodSettings.endDate);
@@ -60,6 +104,12 @@ export const Overview: React.FC = () => {
           <p className="text-xs uppercase tracking-wide text-ink-500 mb-1 dark:text-ink-300">{t(language, 'dailyAllowance')}</p>
           <p className={`text-2xl font-semibold ${dailyAllowance < 0 ? 'text-rose-600 dark:text-rose-300' : 'text-teal-700 dark:text-teal-300'}`}>
             {formatCurrency(dailyAllowance)}
+          </p>
+        </div>
+        <div className="rounded-xl border border-sky-200/60 bg-sky-50/70 p-4 dark:border-sky-500/30 dark:bg-sky-500/10">
+          <p className="text-xs uppercase tracking-wide text-ink-500 mb-1 dark:text-ink-300">{t(language, 'nextDayAllowance')}</p>
+          <p className={`text-2xl font-semibold ${nextDayAllowance < 0 ? 'text-rose-600 dark:text-rose-300' : 'text-sky-700 dark:text-sky-300'}`}>
+            {formatCurrency(nextDayAllowance)}
           </p>
         </div>
       </div>
