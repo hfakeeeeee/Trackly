@@ -1,7 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AppState, IncomeItem, DebtItem, SavingsItem, BillItem, ExpenseItem } from './types';
+import { AppState, IncomeItem, DebtItem, SavingsItem, BillItem, ExpenseItem, Sheet } from './types';
 
-interface AppContextType extends AppState {
+interface AppContextType extends AppState, Sheet {
+  currentSheet: Sheet;
+  setCurrentSheet: (id: string) => void;
+  addSheet: (name?: string) => void;
+  renameSheet: (id: string, name: string) => void;
   addIncome: (item: Omit<IncomeItem, 'id'>) => void;
   removeIncome: (id: string) => void;
   updateIncome: (id: string, item: Partial<Omit<IncomeItem, 'id'>>) => void;
@@ -35,7 +39,18 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'trackly-data';
 
-const defaultState: AppState = {
+const defaultCategories = [
+  { id: '1', name: 'Food & Dining', total: 0 },
+  { id: '2', name: 'Transportation', total: 0 },
+  { id: '3', name: 'Shopping', total: 0 },
+  { id: '4', name: 'Entertainment', total: 0 },
+  { id: '5', name: 'Healthcare', total: 0 },
+  { id: '6', name: 'Others', total: 0 },
+];
+
+const createDefaultSheet = (name: string): Sheet => ({
+  id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+  name,
   periodSettings: {
     startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
     endDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0],
@@ -45,14 +60,14 @@ const defaultState: AppState = {
   savings: [],
   bills: [],
   expenses: [],
-  categories: [
-    { id: '1', name: 'Food & Dining', total: 0 },
-    { id: '2', name: 'Transportation', total: 0 },
-    { id: '3', name: 'Shopping', total: 0 },
-    { id: '4', name: 'Entertainment', total: 0 },
-    { id: '5', name: 'Healthcare', total: 0 },
-    { id: '6', name: 'Others', total: 0 },
-  ],
+  categories: defaultCategories.map(cat => ({ ...cat })),
+});
+
+const defaultSheet = createDefaultSheet('Current Month');
+
+const defaultState: AppState = {
+  sheets: [defaultSheet],
+  currentSheetId: defaultSheet.id,
   uiSettings: {
     theme: 'light',
     language: 'en',
@@ -64,10 +79,35 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
-        const parsed = JSON.parse(saved) as Partial<AppState>;
+        const parsed = JSON.parse(saved) as Partial<AppState> & Partial<Sheet>;
+        if (parsed.sheets && parsed.sheets.length > 0) {
+          return {
+            ...defaultState,
+            ...parsed,
+            currentSheetId: parsed.currentSheetId ?? parsed.sheets[0].id,
+            uiSettings: {
+              ...defaultState.uiSettings,
+              ...(parsed.uiSettings ?? {}),
+            },
+          };
+        }
+
+        // Migrate legacy single-sheet data into sheets array
+        const legacySheet: Sheet = {
+          id: defaultSheet.id,
+          name: 'Current Month',
+          periodSettings: parsed.periodSettings ?? defaultSheet.periodSettings,
+          income: parsed.income ?? [],
+          debts: parsed.debts ?? [],
+          savings: parsed.savings ?? [],
+          bills: parsed.bills ?? [],
+          expenses: parsed.expenses ?? [],
+          categories: parsed.categories ?? defaultCategories.map(cat => ({ ...cat })),
+        };
+
         return {
-          ...defaultState,
-          ...parsed,
+          sheets: [legacySheet],
+          currentSheetId: legacySheet.id,
           uiSettings: {
             ...defaultState.uiSettings,
             ...(parsed.uiSettings ?? {}),
@@ -97,207 +137,315 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
 
+  const getCurrentSheet = (s: AppState) => s.sheets.find(sheet => sheet.id === s.currentSheetId) ?? s.sheets[0];
+
+  const setCurrentSheet = (id: string) => {
+    setState(prev => ({
+      ...prev,
+      currentSheetId: prev.sheets.some(sheet => sheet.id === id) ? id : prev.currentSheetId,
+    }));
+  };
+
+  const addSheet = (name?: string) => {
+    const sheetName = name?.trim() || `Sheet ${state.sheets.length + 1}`;
+    const newSheet = createDefaultSheet(sheetName);
+    setState(prev => ({
+      ...prev,
+      sheets: [...prev.sheets, newSheet],
+      currentSheetId: newSheet.id,
+    }));
+  };
+
+  const renameSheet = (id: string, name: string) => {
+    const trimmedName = name.trim();
+    if (!trimmedName) return;
+    setState(prev => ({
+      ...prev,
+      sheets: prev.sheets.map(sheet =>
+        sheet.id === id ? { ...sheet, name: trimmedName } : sheet
+      ),
+    }));
+  };
+
   const addIncome = (item: Omit<IncomeItem, 'id'>) => {
     setState(prev => ({
       ...prev,
-      income: [...prev.income, { ...item, id: generateId() }],
+      sheets: prev.sheets.map(sheet =>
+        sheet.id === prev.currentSheetId
+          ? { ...sheet, income: [...sheet.income, { ...item, id: generateId() }] }
+          : sheet
+      ),
     }));
   };
 
   const removeIncome = (id: string) => {
     setState(prev => ({
       ...prev,
-      income: prev.income.filter(item => item.id !== id),
+      sheets: prev.sheets.map(sheet =>
+        sheet.id === prev.currentSheetId
+          ? { ...sheet, income: sheet.income.filter(item => item.id !== id) }
+          : sheet
+      ),
     }));
   };
 
   const updateIncome = (id: string, item: Partial<Omit<IncomeItem, 'id'>>) => {
     setState(prev => ({
       ...prev,
-      income: prev.income.map(inc => inc.id === id ? { ...inc, ...item } : inc),
+      sheets: prev.sheets.map(sheet =>
+        sheet.id === prev.currentSheetId
+          ? { ...sheet, income: sheet.income.map(inc => inc.id === id ? { ...inc, ...item } : inc) }
+          : sheet
+      ),
     }));
   };
 
   const addDebt = (item: Omit<DebtItem, 'id'>) => {
     setState(prev => ({
       ...prev,
-      debts: [...prev.debts, { ...item, id: generateId() }],
+      sheets: prev.sheets.map(sheet =>
+        sheet.id === prev.currentSheetId
+          ? { ...sheet, debts: [...sheet.debts, { ...item, id: generateId() }] }
+          : sheet
+      ),
     }));
   };
 
   const removeDebt = (id: string) => {
     setState(prev => ({
       ...prev,
-      debts: prev.debts.filter(item => item.id !== id),
+      sheets: prev.sheets.map(sheet =>
+        sheet.id === prev.currentSheetId
+          ? { ...sheet, debts: sheet.debts.filter(item => item.id !== id) }
+          : sheet
+      ),
     }));
   };
 
   const updateDebt = (id: string, item: Partial<Omit<DebtItem, 'id'>>) => {
     setState(prev => ({
       ...prev,
-      debts: prev.debts.map(debt => debt.id === id ? { ...debt, ...item } : debt),
+      sheets: prev.sheets.map(sheet =>
+        sheet.id === prev.currentSheetId
+          ? { ...sheet, debts: sheet.debts.map(debt => debt.id === id ? { ...debt, ...item } : debt) }
+          : sheet
+      ),
     }));
   };
 
   const addSavings = (item: Omit<SavingsItem, 'id'>) => {
     setState(prev => ({
       ...prev,
-      savings: [...prev.savings, { ...item, id: generateId() }],
+      sheets: prev.sheets.map(sheet =>
+        sheet.id === prev.currentSheetId
+          ? { ...sheet, savings: [...sheet.savings, { ...item, id: generateId() }] }
+          : sheet
+      ),
     }));
   };
 
   const removeSavings = (id: string) => {
     setState(prev => ({
       ...prev,
-      savings: prev.savings.filter(item => item.id !== id),
+      sheets: prev.sheets.map(sheet =>
+        sheet.id === prev.currentSheetId
+          ? { ...sheet, savings: sheet.savings.filter(item => item.id !== id) }
+          : sheet
+      ),
     }));
   };
 
   const updateSavings = (id: string, item: Partial<Omit<SavingsItem, 'id'>>) => {
     setState(prev => ({
       ...prev,
-      savings: prev.savings.map(sav => sav.id === id ? { ...sav, ...item } : sav),
+      sheets: prev.sheets.map(sheet =>
+        sheet.id === prev.currentSheetId
+          ? { ...sheet, savings: sheet.savings.map(sav => sav.id === id ? { ...sav, ...item } : sav) }
+          : sheet
+      ),
     }));
   };
 
   const addBill = (item: Omit<BillItem, 'id'>) => {
     setState(prev => ({
       ...prev,
-      bills: [...prev.bills, { ...item, id: generateId() }],
+      sheets: prev.sheets.map(sheet =>
+        sheet.id === prev.currentSheetId
+          ? { ...sheet, bills: [...sheet.bills, { ...item, id: generateId() }] }
+          : sheet
+      ),
     }));
   };
 
   const removeBill = (id: string) => {
     setState(prev => ({
       ...prev,
-      bills: prev.bills.filter(item => item.id !== id),
+      sheets: prev.sheets.map(sheet =>
+        sheet.id === prev.currentSheetId
+          ? { ...sheet, bills: sheet.bills.filter(item => item.id !== id) }
+          : sheet
+      ),
     }));
   };
 
   const updateBill = (id: string, item: Partial<Omit<BillItem, 'id'>>) => {
     setState(prev => ({
       ...prev,
-      bills: prev.bills.map(bill => bill.id === id ? { ...bill, ...item } : bill),
+      sheets: prev.sheets.map(sheet =>
+        sheet.id === prev.currentSheetId
+          ? { ...sheet, bills: sheet.bills.map(bill => bill.id === id ? { ...bill, ...item } : bill) }
+          : sheet
+      ),
     }));
   };
 
   const addExpense = (item: Omit<ExpenseItem, 'id'>) => {
     const newExpense = { ...item, id: generateId() };
     setState(prev => {
-      const updatedCategories = prev.categories.map(cat => {
-        if (cat.name === item.category) {
-          return { ...cat, total: cat.total + item.amount };
-        }
-        return cat;
+      const updatedSheets = prev.sheets.map(sheet => {
+        if (sheet.id !== prev.currentSheetId) return sheet;
+        const updatedCategories = sheet.categories.map(cat => {
+          if (cat.name === item.category) {
+            return { ...cat, total: cat.total + item.amount };
+          }
+          return cat;
+        });
+
+        return {
+          ...sheet,
+          expenses: [...sheet.expenses, newExpense],
+          categories: updatedCategories,
+        };
       });
 
-      return {
-        ...prev,
-        expenses: [...prev.expenses, newExpense],
-        categories: updatedCategories,
-      };
+      return { ...prev, sheets: updatedSheets };
     });
   };
 
   const removeExpense = (id: string) => {
     setState(prev => {
-      const expense = prev.expenses.find(e => e.id === id);
-      if (!expense) return prev;
+      const updatedSheets = prev.sheets.map(sheet => {
+        if (sheet.id !== prev.currentSheetId) return sheet;
+        const expense = sheet.expenses.find(e => e.id === id);
+        if (!expense) return sheet;
 
-      const updatedCategories = prev.categories.map(cat => {
-        if (cat.name === expense.category) {
-          return { ...cat, total: Math.max(0, cat.total - expense.amount) };
-        }
-        return cat;
+        const updatedCategories = sheet.categories.map(cat => {
+          if (cat.name === expense.category) {
+            return { ...cat, total: Math.max(0, cat.total - expense.amount) };
+          }
+          return cat;
+        });
+
+        return {
+          ...sheet,
+          expenses: sheet.expenses.filter(item => item.id !== id),
+          categories: updatedCategories,
+        };
       });
 
-      return {
-        ...prev,
-        expenses: prev.expenses.filter(item => item.id !== id),
-        categories: updatedCategories,
-      };
+      return { ...prev, sheets: updatedSheets };
     });
   };
 
   const updateExpense = (id: string, item: Partial<Omit<ExpenseItem, 'id'>>) => {
     setState(prev => {
-      const oldExpense = prev.expenses.find(e => e.id === id);
-      if (!oldExpense) return prev;
+      const updatedSheets = prev.sheets.map(sheet => {
+        if (sheet.id !== prev.currentSheetId) return sheet;
+        const oldExpense = sheet.expenses.find(e => e.id === id);
+        if (!oldExpense) return sheet;
 
-      const updatedExpense = { ...oldExpense, ...item };
-      
-      // Update category totals
-      let updatedCategories = prev.categories;
-      
-      // If category changed or amount changed, update totals
-      if (item.category !== undefined || item.amount !== undefined) {
-        updatedCategories = prev.categories.map(cat => {
-          // Subtract old amount from old category
-          if (cat.name === oldExpense.category) {
-            const newTotal = Math.max(0, cat.total - oldExpense.amount);
-            return { ...cat, total: newTotal };
-          }
-          return cat;
-        }).map(cat => {
-          // Add new amount to new category
-          if (cat.name === updatedExpense.category) {
-            return { ...cat, total: cat.total + updatedExpense.amount };
-          }
-          return cat;
-        });
-      }
+        const updatedExpense = { ...oldExpense, ...item };
 
-      return {
-        ...prev,
-        expenses: prev.expenses.map(exp => exp.id === id ? updatedExpense : exp),
-        categories: updatedCategories,
-      };
+        let updatedCategories = sheet.categories;
+        if (item.category !== undefined || item.amount !== undefined) {
+          updatedCategories = sheet.categories.map(cat => {
+            if (cat.name === oldExpense.category) {
+              const newTotal = Math.max(0, cat.total - oldExpense.amount);
+              return { ...cat, total: newTotal };
+            }
+            return cat;
+          }).map(cat => {
+            if (cat.name === updatedExpense.category) {
+              return { ...cat, total: cat.total + updatedExpense.amount };
+            }
+            return cat;
+          });
+        }
+
+        return {
+          ...sheet,
+          expenses: sheet.expenses.map(exp => exp.id === id ? updatedExpense : exp),
+          categories: updatedCategories,
+        };
+      });
+
+      return { ...prev, sheets: updatedSheets };
     });
   };
 
   const addCategory = (name: string) => {
     setState(prev => ({
       ...prev,
-      categories: [...prev.categories, { id: generateId(), name, total: 0 }],
+      sheets: prev.sheets.map(sheet =>
+        sheet.id === prev.currentSheetId
+          ? { ...sheet, categories: [...sheet.categories, { id: generateId(), name, total: 0 }] }
+          : sheet
+      ),
     }));
   };
 
   const removeCategory = (id: string) => {
     setState(prev => ({
       ...prev,
-      categories: prev.categories.filter(cat => cat.id !== id),
+      sheets: prev.sheets.map(sheet =>
+        sheet.id === prev.currentSheetId
+          ? { ...sheet, categories: sheet.categories.filter(cat => cat.id !== id) }
+          : sheet
+      ),
     }));
   };
 
   const updateCategory = (id: string, name: string) => {
     setState(prev => ({
       ...prev,
-      categories: prev.categories.map(cat => cat.id === id ? { ...cat, name } : cat),
+      sheets: prev.sheets.map(sheet =>
+        sheet.id === prev.currentSheetId
+          ? { ...sheet, categories: sheet.categories.map(cat => cat.id === id ? { ...cat, name } : cat) }
+          : sheet
+      ),
     }));
   };
 
   const updatePeriod = (startDate: string, endDate: string) => {
     setState(prev => ({
       ...prev,
-      periodSettings: { startDate, endDate },
+      sheets: prev.sheets.map(sheet =>
+        sheet.id === prev.currentSheetId
+          ? { ...sheet, periodSettings: { startDate, endDate } }
+          : sheet
+      ),
     }));
   };
 
   const getTotalIncome = () => {
-    return state.income.reduce((sum, item) => sum + item.amount, 0);
+    const sheet = getCurrentSheet(state);
+    return sheet.income.reduce((sum, item) => sum + item.amount, 0);
   };
 
   const getTotalSavings = () => {
-    return state.savings.reduce((sum, item) => sum + item.amount, 0);
+    const sheet = getCurrentSheet(state);
+    return sheet.savings.reduce((sum, item) => sum + item.amount, 0);
   };
 
   const getTotalExpenses = () => {
-    return state.expenses.reduce((sum, item) => sum + item.amount, 0);
+    const sheet = getCurrentSheet(state);
+    return sheet.expenses.reduce((sum, item) => sum + item.amount, 0);
   };
 
   const getRemainingAmount = () => {
-    const totalDebts = state.debts.reduce((sum, item) => sum + item.amount, 0);
-    const totalBills = state.bills.reduce((sum, item) => sum + item.amount, 0);
+    const sheet = getCurrentSheet(state);
+    const totalDebts = sheet.debts.reduce((sum, item) => sum + item.amount, 0);
+    const totalBills = sheet.bills.reduce((sum, item) => sum + item.amount, 0);
     return getTotalIncome() - getTotalSavings() - getTotalExpenses() - totalDebts - totalBills;
   };
 
@@ -335,6 +483,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     <AppContext.Provider
       value={{
         ...state,
+        ...getCurrentSheet(state),
+        currentSheet: getCurrentSheet(state),
+        setCurrentSheet,
+        addSheet,
+        renameSheet,
         addIncome,
         removeIncome,
         updateIncome,

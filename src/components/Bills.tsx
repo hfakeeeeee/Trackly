@@ -70,6 +70,14 @@ export const Bills: React.FC = () => {
     setConfirmOpen(false);
   };
 
+  const handleRemoveRow = (index: number) => {
+    const item = bills[index];
+    if (item) {
+      removeBill(item.id);
+    }
+    setMaxRows((prev) => (prev > 1 ? prev - 1 : prev));
+  };
+
   const renderRow = (index: number) => {
     const item = bills[index];
     
@@ -104,17 +112,28 @@ export const Bills: React.FC = () => {
           />
         </td>
         <td className="py-2 px-3 text-center">
-          {item ? (
+          <div className="flex items-center justify-center gap-2">
+            {item ? (
+              <button
+                onClick={() => removeBill(item.id)}
+                className="text-amber-600 hover:text-amber-700 font-medium p-1 transition-transform duration-200 hover:scale-110 active:scale-95"
+                title={t(language, 'clearRow')}
+              >
+                <svg className="w-5 h-5 transition-transform duration-200 hover:-rotate-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H8m0 0l3.5-3.5M8 12l3.5 3.5M4 20h10a2 2 0 002-2v-2" />
+                </svg>
+              </button>
+            ) : null}
             <button
-              onClick={() => removeBill(item.id)}
-              className="text-amber-600 hover:text-amber-700 font-medium p-1 transition-transform duration-200 hover:scale-110 active:scale-95"
-              title={t(language, 'clearRow')}
+              onClick={() => handleRemoveRow(index)}
+              className={`text-rose-600 hover:text-rose-700 font-medium p-1 transition-transform duration-200 hover:scale-110 active:scale-95 ${maxRows <= 1 ? 'opacity-40 pointer-events-none' : ''}`}
+              title={t(language, 'removeRow')}
             >
-              <svg className="w-5 h-5 transition-transform duration-200 hover:-rotate-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H8m0 0l3.5-3.5M8 12l3.5 3.5M4 20h10a2 2 0 002-2v-2" />
+              <svg className="w-5 h-5 transition-transform duration-200 hover:rotate-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6h18M8 6V4h8v2M6 6l1 14a2 2 0 002 2h6a2 2 0 002-2l1-14M10 10v6M14 10v6" />
               </svg>
             </button>
-          ) : null}
+          </div>
         </td>
       </tr>
     );
@@ -165,7 +184,7 @@ export const Bills: React.FC = () => {
               <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 border-r border-ink-100/70">{t(language, 'description')}</th>
               <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-32 border-r border-ink-100/70">{t(language, 'dueDate')}</th>
               <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-40 border-r border-ink-100/70">{t(language, 'amount')}</th>
-              <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-16">{t(language, 'action')}</th>
+              <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-20">{t(language, 'action')}</th>
             </tr>
           </thead>
           <tbody>

@@ -28,6 +28,7 @@ const translations = {
     add: 'Add',
     clearAll: 'Clear All',
     clearRow: 'Clear row',
+    removeRow: 'Remove row',
     action: 'Action',
     description: 'Description',
     amount: 'Amount',
@@ -55,6 +56,10 @@ const translations = {
     theme: 'Theme',
     light: 'Light',
     dark: 'Dark',
+    sheets: 'Sheets',
+    addSheet: 'Add Sheet',
+    newSheetName: 'New sheet name',
+    renameSheet: 'Rename sheet',
   },
   vi: {
     monthlySnapshot: 'Tổng quan tháng',
@@ -83,6 +88,7 @@ const translations = {
     add: 'Thêm',
     clearAll: 'Xóa tất cả',
     clearRow: 'Xóa dòng',
+    removeRow: 'Xóa dòng (gỡ)',
     action: 'Thao tác',
     description: 'Mô tả',
     amount: 'Số tiền',
@@ -110,6 +116,10 @@ const translations = {
     theme: 'Giao diện',
     light: 'Sáng',
     dark: 'Tối',
+    sheets: 'Trang',
+    addSheet: 'Thêm trang',
+    newSheetName: 'Tên trang mới',
+    renameSheet: 'Đổi tên trang',
   },
 } as const;
 

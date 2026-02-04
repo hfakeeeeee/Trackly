@@ -46,6 +46,17 @@ export interface PeriodSettings {
 }
 
 export interface AppState {
+  sheets: Sheet[];
+  currentSheetId: string;
+  uiSettings: {
+    theme: 'light' | 'dark';
+    language: 'en' | 'vi';
+  };
+}
+
+export interface Sheet {
+  id: string;
+  name: string;
   periodSettings: PeriodSettings;
   income: IncomeItem[];
   debts: DebtItem[];
@@ -53,8 +64,4 @@ export interface AppState {
   bills: BillItem[];
   expenses: ExpenseItem[];
   categories: Category[];
-  uiSettings: {
-    theme: 'light' | 'dark';
-    language: 'en' | 'vi';
-  };
 }

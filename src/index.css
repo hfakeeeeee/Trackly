@@ -353,3 +353,8 @@ html, body,
 .light .table-row:hover {
   background: #f9fafb;
 }
+
+.dark select option {
+  background-color: #0f172a;
+  color: #f8fafc;
+}

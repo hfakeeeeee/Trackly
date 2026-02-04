@@ -15,6 +15,11 @@ export const Header: React.FC = () => {
     uiSettings,
     toggleTheme,
     setLanguage,
+    sheets,
+    currentSheetId,
+    setCurrentSheet,
+    addSheet,
+    renameSheet,
   } = useApp();
   const { language, theme } = uiSettings;
 
@@ -57,6 +62,49 @@ export const Header: React.FC = () => {
           </div>
           <div className="flex flex-wrap items-center gap-3 text-sm text-ink-600 dark:text-white/70">
             <span>{t(language, 'tagline')}</span>
+            <div className="flex items-center gap-2 rounded-full border border-ink-900/10 bg-white/70 px-2 py-1 dark:border-white/20 dark:bg-ink-900/60">
+              <span className="text-xs uppercase tracking-wide text-ink-500 dark:text-white/60">{t(language, 'sheets')}</span>
+              <select
+                value={currentSheetId}
+                onChange={(e) => setCurrentSheet(e.target.value)}
+                className="rounded-full bg-transparent px-2 py-1 text-xs font-semibold text-ink-800 focus:outline-none dark:text-white/90"
+              >
+                {sheets.map((sheet) => (
+                  <option key={sheet.id} value={sheet.id}>
+                    {sheet.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => {
+                  const current = sheets.find(sheet => sheet.id === currentSheetId);
+                  const name = window.prompt(t(language, 'renameSheet'), current?.name ?? '');
+                  if (name && name.trim()) {
+                    renameSheet(currentSheetId, name);
+                  }
+                }}
+                className="rounded-full bg-ink-900/10 px-2 py-1 text-xs font-semibold text-ink-800 transition hover:bg-ink-900/20 dark:bg-white/15 dark:text-white dark:hover:bg-white/25"
+                title={t(language, 'renameSheet')}
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 11l6.232-6.232a2 2 0 012.828 0l1.172 1.172a2 2 0 010 2.828L13 15H9v-4z" />
+                </svg>
+              </button>
+              <button
+                onClick={() => {
+                  const name = window.prompt(t(language, 'newSheetName'));
+                  if (name && name.trim()) {
+                    addSheet(name.trim());
+                  } else if (name === '') {
+                    addSheet();
+                  }
+                }}
+                className="rounded-full bg-ink-900/10 px-2 py-1 text-xs font-semibold text-ink-800 transition hover:bg-ink-900/20 dark:bg-white/15 dark:text-white dark:hover:bg-white/25"
+                title={t(language, 'addSheet')}
+              >
+                +
+              </button>
+            </div>
             <div className="flex items-center gap-2 rounded-full border border-ink-900/10 bg-white/70 px-2 py-1 dark:border-white/20 dark:bg-white/10">
               <span className="text-xs uppercase tracking-wide text-ink-500 dark:text-white/60">{t(language, 'theme')}</span>
               <button
