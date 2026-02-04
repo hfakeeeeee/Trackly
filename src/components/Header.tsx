@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useApp } from '../AppContext';
 import { addDays, format, isAfter, parseISO, startOfDay } from 'date-fns';
 import { t } from '../i18n';
@@ -25,6 +25,23 @@ export const Header: React.FC = () => {
     signOut,
   } = useApp();
   const { language, theme } = uiSettings;
+  const [accountOpen, setAccountOpen] = useState(false);
+  const accountRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!accountRef.current) return;
+      if (!accountRef.current.contains(event.target as Node)) {
+        setAccountOpen(false);
+      }
+    };
+    if (accountOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [accountOpen]);
 
   const getDominantMonthLabel = (startDate: string, endDate: string) => {
     const start = startOfDay(parseISO(startDate));
@@ -174,17 +191,37 @@ export const Header: React.FC = () => {
                 {language === 'en' ? 'EN' : 'VI'}
               </button>
             </div>
-            <div className="flex items-center gap-2 rounded-full border border-ink-900/10 bg-white/70 px-2 py-1 dark:border-white/20 dark:bg-white/10">
-              <span className="text-xs uppercase tracking-wide text-ink-500 dark:text-white/60">
-                {user?.email ?? 'User'}
-              </span>
+            <div className="relative" ref={accountRef}>
               <button
-                onClick={() => signOut()}
-                className="inline-flex items-center gap-1 rounded-full bg-ink-900/10 px-2 py-1 text-xs font-semibold text-ink-800 transition hover:bg-ink-900/20 dark:bg-white/15 dark:text-white dark:hover:bg-white/25"
-                title={t(language, 'signOut')}
+                onClick={() => setAccountOpen((prev) => !prev)}
+                className="inline-flex items-center gap-1 rounded-full border border-ink-900/10 bg-white/70 px-2 py-1 text-xs font-semibold text-ink-800 transition hover:bg-ink-900/20 dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+                title={t(language, 'account')}
               >
-                {t(language, 'signOut')}
+                <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path d="M10 10a4 4 0 100-8 4 4 0 000 8zM3 16a7 7 0 0114 0v1H3v-1z" />
+                </svg>
               </button>
+              <div
+                className={`absolute right-0 mt-2 w-56 rounded-xl border border-ink-200/70 bg-white/95 p-3 text-xs text-ink-700 shadow-float transition z-50 ${
+                  accountOpen ? 'opacity-100 translate-y-0' : 'pointer-events-none opacity-0 -translate-y-1'
+                } dark:border-ink-700/70 dark:bg-ink-900/95 dark:text-ink-200`}
+              >
+                <div className="mb-2 text-[10px] uppercase tracking-wide text-ink-500 dark:text-ink-400">
+                  {t(language, 'signedInAs')}
+                </div>
+                <div className="font-semibold text-ink-900 dark:text-ink-100">
+                  {user?.email ?? t(language, 'unknownUser')}
+                </div>
+                <button
+                  onClick={() => {
+                    setAccountOpen(false);
+                    signOut();
+                  }}
+                  className="mt-3 w-full rounded-lg bg-ink-900/10 py-1.5 text-xs font-semibold text-ink-800 transition hover:bg-ink-900/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+                >
+                  {t(language, 'signOut')}
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -98,6 +98,9 @@ const translations = {
     resetEmailSent: 'We sent a reset link. Please check your inbox.',
     signOut: 'Sign out',
     loading: 'Loading...',
+    account: 'Account',
+    signedInAs: 'Signed in as',
+    unknownUser: 'Unknown user',
   },
   vi: {
     monthlySnapshot: 'Tổng quan tháng',
@@ -196,6 +199,9 @@ const translations = {
     resetEmailSent: 'Da gui lien ket dat lai. Vui long kiem tra hop thu.',
     signOut: 'Dang xuat',
     loading: 'Dang tai...',
+    account: 'Tai khoan',
+    signedInAs: 'Dang nhap voi',
+    unknownUser: 'Nguoi dung',
   },
 } as const;
 
