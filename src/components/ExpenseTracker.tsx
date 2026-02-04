@@ -11,11 +11,14 @@ export const ExpenseTracker: React.FC = () => {
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
+  };
+
+  const parseNumber = (value: string) => {
+    const cleaned = value.replace(/[^\d]/g, '');
+    return cleaned ? Number(cleaned) : 0;
   };
 
   const totalExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
@@ -44,7 +47,7 @@ export const ExpenseTracker: React.FC = () => {
           updateExpense(existingItem.id, { category: value });
         }
       } else {
-        const numValue = parseFloat(value) || 0;
+        const numValue = parseNumber(value);
         if (numValue === 0 && !existingItem.date && !existingItem.description.trim() && !existingItem.category) {
           removeExpense(existingItem.id);
         } else {
@@ -60,7 +63,7 @@ export const ExpenseTracker: React.FC = () => {
       } else if (field === 'category' && value) {
         addExpense({ date: '', description: '', category: value, amount: 0 });
       } else if (field === 'amount' && value) {
-        const numValue = parseFloat(value) || 0;
+        const numValue = parseNumber(value);
         if (numValue > 0) {
           addExpense({ date: '', description: '', category: '', amount: numValue });
         }
@@ -111,9 +114,9 @@ export const ExpenseTracker: React.FC = () => {
         </td>
         <td className="py-2 px-3 border-r border-ink-100/70">
           <input
-            type="number"
-            step="1"
-            value={item?.amount || ''}
+            type="text"
+            inputMode="numeric"
+            value={item?.amount ? formatCurrency(item.amount) : ''}
             onChange={(e) => handleCellChange(index, 'amount', e.target.value)}
             className="input-ghost text-right tabular-nums"
             placeholder="0"

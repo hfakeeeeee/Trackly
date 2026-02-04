@@ -11,11 +11,14 @@ export const Debt: React.FC = () => {
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
+  };
+
+  const parseNumber = (value: string) => {
+    const cleaned = value.replace(/[^\d]/g, '');
+    return cleaned ? Number(cleaned) : 0;
   };
 
   const totalDebt = debts.reduce((sum, item) => sum + item.amount, 0);
@@ -32,7 +35,7 @@ export const Debt: React.FC = () => {
           updateDebt(existingItem.id, { description: value });
         }
       } else if (field === 'amount') {
-        const numValue = parseFloat(value) || 0;
+        const numValue = parseNumber(value);
         if (numValue === 0 && !existingItem.description.trim() && !existingItem.date) {
           removeDebt(existingItem.id);
         } else {
@@ -50,7 +53,7 @@ export const Debt: React.FC = () => {
       if (field === 'description' && value.trim()) {
         addDebt({ description: value, amount: 0, date: '' });
       } else if (field === 'amount' && value) {
-        const numValue = parseFloat(value) || 0;
+        const numValue = parseNumber(value);
         if (numValue > 0) {
           addDebt({ description: '', amount: numValue, date: '' });
         }
@@ -103,9 +106,9 @@ export const Debt: React.FC = () => {
         </td>
         <td className="py-2 px-3 border-r border-ink-100/70">
           <input
-            type="number"
-            step="1"
-            value={item?.amount || ''}
+            type="text"
+            inputMode="numeric"
+            value={item?.amount ? formatCurrency(item.amount) : ''}
             onChange={(e) => handleCellChange(index, 'amount', e.target.value)}
             className="input-ghost text-right tabular-nums"
             placeholder="0"
