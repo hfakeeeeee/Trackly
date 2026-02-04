@@ -87,12 +87,36 @@ const createDefaultState = (): AppState => {
   };
 };
 
+const toNumber = (value: unknown) => {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string') {
+    const cleaned = value.replace(/[^\d.-]/g, '');
+    const parsed = Number(cleaned);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
+};
+
+const normalizeSheet = (sheet: Sheet): Sheet => ({
+  ...sheet,
+  income: sheet.income.map(item => ({ ...item, amount: toNumber(item.amount) })),
+  debts: sheet.debts.map(item => ({ ...item, amount: toNumber(item.amount) })),
+  savings: sheet.savings.map(item => ({ ...item, amount: toNumber(item.amount) })),
+  bills: sheet.bills.map(item => ({ ...item, amount: toNumber(item.amount) })),
+  expenses: sheet.expenses.map(item => ({ ...item, amount: toNumber(item.amount) })),
+  categories: sheet.categories.map(item => ({ ...item, total: toNumber(item.total) })),
+  allowanceSnapshot: sheet.allowanceSnapshot
+    ? { ...sheet.allowanceSnapshot, amount: toNumber(sheet.allowanceSnapshot.amount) }
+    : sheet.allowanceSnapshot,
+});
+
 const buildStateFromData = (parsed?: Partial<AppState> & Partial<Sheet>): AppState => {
   const baseState = createDefaultState();
   if (parsed?.sheets && parsed.sheets.length > 0) {
     return {
       ...baseState,
       ...parsed,
+      sheets: parsed.sheets.map(sheet => normalizeSheet(sheet)),
       currentSheetId: parsed.currentSheetId ?? parsed.sheets[0].id,
       uiSettings: {
         ...baseState.uiSettings,
@@ -107,13 +131,15 @@ const buildStateFromData = (parsed?: Partial<AppState> & Partial<Sheet>): AppSta
     id: baseState.sheets[0].id,
     name: 'Current Month',
     periodSettings: parsed.periodSettings ?? baseState.sheets[0].periodSettings,
-    income: parsed.income ?? [],
-    debts: parsed.debts ?? [],
-    savings: parsed.savings ?? [],
-    bills: parsed.bills ?? [],
-    expenses: parsed.expenses ?? [],
-    categories: parsed.categories ?? defaultCategories.map(cat => ({ ...cat })),
-    allowanceSnapshot: parsed.allowanceSnapshot,
+    income: (parsed.income ?? []).map(item => ({ ...item, amount: toNumber(item.amount) })),
+    debts: (parsed.debts ?? []).map(item => ({ ...item, amount: toNumber(item.amount) })),
+    savings: (parsed.savings ?? []).map(item => ({ ...item, amount: toNumber(item.amount) })),
+    bills: (parsed.bills ?? []).map(item => ({ ...item, amount: toNumber(item.amount) })),
+    expenses: (parsed.expenses ?? []).map(item => ({ ...item, amount: toNumber(item.amount) })),
+    categories: (parsed.categories ?? defaultCategories.map(cat => ({ ...cat }))).map(item => ({ ...item, total: toNumber(item.total) })),
+    allowanceSnapshot: parsed.allowanceSnapshot
+      ? { ...parsed.allowanceSnapshot, amount: toNumber(parsed.allowanceSnapshot.amount) }
+      : parsed.allowanceSnapshot,
   };
 
   return {
@@ -500,23 +526,23 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const getTotalIncome = () => {
     const sheet = getCurrentSheet(state);
-    return sheet.income.reduce((sum, item) => sum + item.amount, 0);
+    return sheet.income.reduce((sum, item) => sum + toNumber(item.amount), 0);
   };
 
   const getTotalSavings = () => {
     const sheet = getCurrentSheet(state);
-    return sheet.savings.reduce((sum, item) => sum + item.amount, 0);
+    return sheet.savings.reduce((sum, item) => sum + toNumber(item.amount), 0);
   };
 
   const getTotalExpenses = () => {
     const sheet = getCurrentSheet(state);
-    return sheet.expenses.reduce((sum, item) => sum + item.amount, 0);
+    return sheet.expenses.reduce((sum, item) => sum + toNumber(item.amount), 0);
   };
 
   const getRemainingAmount = () => {
     const sheet = getCurrentSheet(state);
-    const totalDebts = sheet.debts.reduce((sum, item) => sum + item.amount, 0);
-    const totalBills = sheet.bills.reduce((sum, item) => sum + item.amount, 0);
+    const totalDebts = sheet.debts.reduce((sum, item) => sum + toNumber(item.amount), 0);
+    const totalBills = sheet.bills.reduce((sum, item) => sum + toNumber(item.amount), 0);
     return getTotalIncome() - getTotalSavings() - getTotalExpenses() - totalDebts - totalBills;
   };
 

@@ -16,24 +16,36 @@ export const Overview: React.FC = () => {
 
   const today = new Date();
   const todayKey = format(today, 'yyyy-MM-dd');
+  const startDate = new Date(periodSettings.startDate);
   const endDate = new Date(periodSettings.endDate);
-  const daysRemaining = Math.max(0, differenceInDays(endDate, today) + 1);
+  const daysRemaining = Math.max(0, differenceInDays(endDate, startDate) + 1);
   const remainingAmount = getRemainingAmount();
-  const computedDailyAllowance = daysRemaining > 0 ? remainingAmount / daysRemaining : 0;
+  const safeRemainingAmount = Number.isFinite(remainingAmount) ? remainingAmount : 0;
+  const computedDailyAllowance = daysRemaining > 0 ? safeRemainingAmount / daysRemaining : 0;
   const dailyAllowance =
     currentSheet.allowanceSnapshot?.date === todayKey
       ? currentSheet.allowanceSnapshot.amount
       : computedDailyAllowance;
   const nextDayAllowance =
-    daysRemaining > 1 ? remainingAmount / (daysRemaining - 1) : 0;
+    daysRemaining > 1 ? safeRemainingAmount / (daysRemaining - 1) : 0;
+
+  const toNumber = (value: unknown) => {
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    if (typeof value === 'string') {
+      const cleaned = value.replace(/[^\d.-]/g, '');
+      const parsed = Number(cleaned);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+    return 0;
+  };
 
   useEffect(() => {
     const totalMagnitude =
-      currentSheet.income.reduce((sum, item) => sum + Math.abs(item.amount || 0), 0) +
-      currentSheet.debts.reduce((sum, item) => sum + Math.abs(item.amount || 0), 0) +
-      currentSheet.savings.reduce((sum, item) => sum + Math.abs(item.amount || 0), 0) +
-      currentSheet.bills.reduce((sum, item) => sum + Math.abs(item.amount || 0), 0) +
-      currentSheet.expenses.reduce((sum, item) => sum + Math.abs(item.amount || 0), 0);
+      currentSheet.income.reduce((sum, item) => sum + Math.abs(toNumber(item.amount)), 0) +
+      currentSheet.debts.reduce((sum, item) => sum + Math.abs(toNumber(item.amount)), 0) +
+      currentSheet.savings.reduce((sum, item) => sum + Math.abs(toNumber(item.amount)), 0) +
+      currentSheet.bills.reduce((sum, item) => sum + Math.abs(toNumber(item.amount)), 0) +
+      currentSheet.expenses.reduce((sum, item) => sum + Math.abs(toNumber(item.amount)), 0);
     const hasMeaningfulData = totalMagnitude > 0;
     const snapshotIsToday = currentSheet.allowanceSnapshot?.date === todayKey;
     const shouldRefreshZeroSnapshot =
