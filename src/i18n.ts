@@ -76,7 +76,7 @@ const translations = {
     endDate: 'Ngày kết thúc',
     daysRemaining: 'Số ngày còn lại',
     dailyAllowance: 'Hạn mức mỗi ngày',
-    nextDayAllowance: 'H???n m???c ng??y mai',
+    nextDayAllowance: 'Hạn mức ngày mới',
     income: 'Thu nhập',
     debt: 'Khoản nợ',
     savings: 'Tiết kiệm',
