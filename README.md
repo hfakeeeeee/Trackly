@@ -118,6 +118,17 @@ To deploy:
 1. Go to Actions.
 2. Run the Deploy workflow manually.
 
+### GitHub Actions Secrets (Required)
+
+Add these secrets in your GitHub repo:
+
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
+
 ## Notes About Firebase API Keys
 
 Firebase web API keys are public by design and will appear in the built client bundle.
