@@ -161,9 +161,9 @@ const buildStateFromData = (parsed?: Partial<AppState> & Partial<Sheet>): AppSta
   };
 };
 
-const sanitizeState = (value: AppState) => {
+const sanitizeState = <T,>(value: T): T => {
   // Firestore rejects undefined values; JSON round-trip strips them.
-  return JSON.parse(JSON.stringify(value)) as AppState;
+  return JSON.parse(JSON.stringify(value)) as T;
 };
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {

@@ -15,7 +15,7 @@ import { useApp } from './AppContext';
 import { AuthScreen } from './components/AuthScreen';
 
 function AppContent() {
-  const { themeTransitionId, user, authLoading, dataLoading, shareLoading, shareError, readOnly } = useApp();
+  const { themeTransitionId, user, authLoading, dataLoading, shareLoading, shareError } = useApp();
 
   if (authLoading || shareLoading || (user && dataLoading)) {
     return (
