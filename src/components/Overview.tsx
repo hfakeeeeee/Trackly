@@ -26,9 +26,8 @@ export const Overview: React.FC = () => {
 
   const today = new Date();
   const todayKey = format(today, 'yyyy-MM-dd');
-  const startDate = new Date(periodSettings.startDate);
   const endDate = new Date(periodSettings.endDate);
-  const daysRemaining = Math.max(0, differenceInDays(endDate, startDate) + 1);
+  const daysRemaining = Math.max(0, differenceInDays(endDate, today) + 1);
   const remainingAmount = getRemainingAmount();
   const safeRemainingAmount = Number.isFinite(remainingAmount) ? remainingAmount : 0;
   const computedDailyAllowance = daysRemaining > 0 ? safeRemainingAmount / daysRemaining : 0;
