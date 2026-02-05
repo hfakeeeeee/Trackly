@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, createUserWithEmailAndPassword, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { AppState, IncomeItem, DebtItem, SavingsItem, BillItem, ExpenseItem, Sheet, AllowanceSnapshot } from './types';
+import { deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
+import { FirebaseError } from 'firebase/app';
+import { AppState, IncomeItem, DebtItem, SavingsItem, BillItem, ExpenseItem, Sheet, AllowanceSnapshot, ShareSettings, ShareVisibility } from './types';
 import { auth, db } from './firebase';
 
 interface AppContextType extends AppState, Sheet {
@@ -37,10 +38,15 @@ interface AppContextType extends AppState, Sheet {
   user: User | null;
   authLoading: boolean;
   dataLoading: boolean;
+  shareLoading: boolean;
+  shareError: string | null;
+  readOnly: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
   resendVerification: () => Promise<void>;
+  enableShare: (visibility: ShareVisibility, allowedEmails: string[]) => Promise<void>;
+  disableShare: () => Promise<void>;
   signOut: () => Promise<void>;
   themeTransitionId: number;
   setTheme: (theme: 'light' | 'dark') => void;
@@ -73,6 +79,7 @@ const createDefaultSheet = (name: string): Sheet => ({
   expenses: [],
   categories: defaultCategories.map(cat => ({ ...cat })),
   allowanceSnapshot: undefined,
+  share: undefined,
 });
 
 const createDefaultState = (): AppState => {
@@ -140,6 +147,7 @@ const buildStateFromData = (parsed?: Partial<AppState> & Partial<Sheet>): AppSta
     allowanceSnapshot: parsed.allowanceSnapshot
       ? { ...parsed.allowanceSnapshot, amount: toNumber(parsed.allowanceSnapshot.amount) }
       : parsed.allowanceSnapshot,
+    share: parsed.share,
   };
 
   return {
@@ -163,6 +171,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [dataLoading, setDataLoading] = useState(false);
+  const [shareLoading, setShareLoading] = useState(false);
+  const [shareError, setShareError] = useState<string | null>(null);
+  const [readOnly, setReadOnly] = useState(false);
+  const [sharedSheet, setSharedSheet] = useState<Sheet | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [themeTransitionId, setThemeTransitionId] = useState(0);
 
@@ -201,11 +213,102 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, []);
 
   useEffect(() => {
-    if (!user || !hydrated) return;
+    const params = new URLSearchParams(window.location.search);
+    const shareId = params.get('share');
+    if (!shareId) {
+      setShareError(null);
+      setShareLoading(false);
+      setReadOnly(false);
+      setSharedSheet(null);
+      return;
+    }
+
+    const loadShare = async () => {
+      setShareLoading(true);
+      setShareError(null);
+      try {
+        const ref = doc(db, 'shares', shareId);
+        const snap = await getDoc(ref);
+        if (!snap.exists()) {
+          setShareError('Share link is invalid.');
+          setSharedSheet(null);
+          setReadOnly(false);
+          return;
+        }
+        const data = snap.data() as {
+          visibility: ShareVisibility;
+          allowedEmails?: string[];
+          sheet: Sheet;
+          ownerUid: string;
+        };
+
+        const visibility = data.visibility;
+        const allowedEmails = (data.allowedEmails ?? []).map(email => email.toLowerCase());
+        const userEmail = user?.email?.toLowerCase() ?? '';
+
+        const canAccess =
+          visibility === 'public' ||
+          (visibility === 'restricted' && !!user) ||
+          (visibility === 'invited' && !!user && allowedEmails.includes(userEmail));
+
+        if (!canAccess) {
+          if (!user && (visibility === 'restricted' || visibility === 'invited')) {
+            setShareError(null);
+            setSharedSheet(null);
+            setReadOnly(false);
+            return;
+          }
+          setShareError('You do not have access to this shared sheet.');
+          setSharedSheet(null);
+          setReadOnly(false);
+          return;
+        }
+
+        setSharedSheet(normalizeSheet(data.sheet));
+        setReadOnly(true);
+      } catch (error) {
+        if (error instanceof FirebaseError && error.code === 'permission-denied') {
+          if (!user) {
+            setShareError(null);
+          } else {
+            setShareError('Share access denied. If this link is restricted, make sure you are signed in. If it should be public, allow public reads in Firestore rules.');
+          }
+        } else {
+          setShareError('Unable to load shared sheet.');
+        }
+        setSharedSheet(null);
+        setReadOnly(false);
+      } finally {
+        setShareLoading(false);
+      }
+    };
+
+    if (authLoading) return;
+    loadShare();
+  }, [authLoading, user]);
+
+  useEffect(() => {
+    if (!user || !hydrated || readOnly) return;
     const ref = doc(db, 'users', user.uid);
     setDoc(ref, sanitizeState(state)).catch(() => {
       // Ignore save errors; auth or network may be temporarily unavailable.
     });
+
+    const current = getCurrentSheet(state);
+    if (current.share?.id) {
+      const shareDoc = {
+        ownerUid: user.uid,
+        sheetId: current.id,
+        sheetName: current.name,
+        visibility: current.share.visibility,
+        allowedEmails: current.share.allowedEmails,
+        sheet: { ...current, share: current.share },
+        updatedAt: Date.now(),
+      };
+      setDoc(doc(db, 'shares', current.share.id), sanitizeState(shareDoc)).catch(() => {
+        // Ignore share sync errors.
+      });
+    }
   }, [hydrated, state, user]);
 
   useEffect(() => {
@@ -219,10 +322,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, [state.uiSettings.theme]);
 
   const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
+  const generateShareId = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
 
   const getCurrentSheet = (s: AppState) => s.sheets.find(sheet => sheet.id === s.currentSheetId) ?? s.sheets[0];
 
   const setCurrentSheet = (id: string) => {
+    if (readOnly) return;
     setState(prev => ({
       ...prev,
       currentSheetId: prev.sheets.some(sheet => sheet.id === id) ? id : prev.currentSheetId,
@@ -230,6 +335,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const addSheet = (name?: string) => {
+    if (readOnly) return;
     const sheetName = name?.trim() || `Sheet ${state.sheets.length + 1}`;
     const newSheet = createDefaultSheet(sheetName);
     setState(prev => ({
@@ -240,6 +346,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const renameSheet = (id: string, name: string) => {
+    if (readOnly) return;
     const trimmedName = name.trim();
     if (!trimmedName) return;
     setState(prev => ({
@@ -251,6 +358,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const removeSheet = (id: string) => {
+    if (readOnly) return;
     setState(prev => {
       if (prev.sheets.length <= 1) return prev;
       const remainingSheets = prev.sheets.filter(sheet => sheet.id !== id);
@@ -265,6 +373,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const addIncome = (item: Omit<IncomeItem, 'id'>) => {
+    if (readOnly) return;
     setState(prev => ({
       ...prev,
       sheets: prev.sheets.map(sheet =>
@@ -276,6 +385,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const removeIncome = (id: string) => {
+    if (readOnly) return;
     setState(prev => ({
       ...prev,
       sheets: prev.sheets.map(sheet =>
@@ -287,6 +397,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const updateIncome = (id: string, item: Partial<Omit<IncomeItem, 'id'>>) => {
+    if (readOnly) return;
     setState(prev => ({
       ...prev,
       sheets: prev.sheets.map(sheet =>
@@ -298,6 +409,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const addDebt = (item: Omit<DebtItem, 'id'>) => {
+    if (readOnly) return;
     setState(prev => ({
       ...prev,
       sheets: prev.sheets.map(sheet =>
@@ -309,6 +421,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const removeDebt = (id: string) => {
+    if (readOnly) return;
     setState(prev => ({
       ...prev,
       sheets: prev.sheets.map(sheet =>
@@ -320,6 +433,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const updateDebt = (id: string, item: Partial<Omit<DebtItem, 'id'>>) => {
+    if (readOnly) return;
     setState(prev => ({
       ...prev,
       sheets: prev.sheets.map(sheet =>
@@ -331,6 +445,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const addSavings = (item: Omit<SavingsItem, 'id'>) => {
+    if (readOnly) return;
     setState(prev => ({
       ...prev,
       sheets: prev.sheets.map(sheet =>
@@ -342,6 +457,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const removeSavings = (id: string) => {
+    if (readOnly) return;
     setState(prev => ({
       ...prev,
       sheets: prev.sheets.map(sheet =>
@@ -353,6 +469,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const updateSavings = (id: string, item: Partial<Omit<SavingsItem, 'id'>>) => {
+    if (readOnly) return;
     setState(prev => ({
       ...prev,
       sheets: prev.sheets.map(sheet =>
@@ -364,6 +481,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const addBill = (item: Omit<BillItem, 'id'>) => {
+    if (readOnly) return;
     setState(prev => ({
       ...prev,
       sheets: prev.sheets.map(sheet =>
@@ -375,6 +493,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const removeBill = (id: string) => {
+    if (readOnly) return;
     setState(prev => ({
       ...prev,
       sheets: prev.sheets.map(sheet =>
@@ -386,6 +505,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const updateBill = (id: string, item: Partial<Omit<BillItem, 'id'>>) => {
+    if (readOnly) return;
     setState(prev => ({
       ...prev,
       sheets: prev.sheets.map(sheet =>
@@ -397,6 +517,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const addExpense = (item: Omit<ExpenseItem, 'id'>) => {
+    if (readOnly) return;
     const newExpense = { ...item, id: generateId() };
     setState(prev => {
       const updatedSheets = prev.sheets.map(sheet => {
@@ -420,6 +541,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const removeExpense = (id: string) => {
+    if (readOnly) return;
     setState(prev => {
       const updatedSheets = prev.sheets.map(sheet => {
         if (sheet.id !== prev.currentSheetId) return sheet;
@@ -445,6 +567,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const updateExpense = (id: string, item: Partial<Omit<ExpenseItem, 'id'>>) => {
+    if (readOnly) return;
     setState(prev => {
       const updatedSheets = prev.sheets.map(sheet => {
         if (sheet.id !== prev.currentSheetId) return sheet;
@@ -481,6 +604,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const addCategory = (name: string) => {
+    if (readOnly) return;
     setState(prev => ({
       ...prev,
       sheets: prev.sheets.map(sheet =>
@@ -492,6 +616,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const removeCategory = (id: string) => {
+    if (readOnly) return;
     setState(prev => ({
       ...prev,
       sheets: prev.sheets.map(sheet =>
@@ -503,6 +628,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const updateCategory = (id: string, name: string) => {
+    if (readOnly) return;
     setState(prev => ({
       ...prev,
       sheets: prev.sheets.map(sheet =>
@@ -514,6 +640,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const updatePeriod = (startDate: string, endDate: string) => {
+    if (readOnly) return;
     setState(prev => ({
       ...prev,
       sheets: prev.sheets.map(sheet =>
@@ -525,28 +652,29 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const getTotalIncome = () => {
-    const sheet = getCurrentSheet(state);
+    const sheet = sharedSheet ?? getCurrentSheet(state);
     return sheet.income.reduce((sum, item) => sum + toNumber(item.amount), 0);
   };
 
   const getTotalSavings = () => {
-    const sheet = getCurrentSheet(state);
+    const sheet = sharedSheet ?? getCurrentSheet(state);
     return sheet.savings.reduce((sum, item) => sum + toNumber(item.amount), 0);
   };
 
   const getTotalExpenses = () => {
-    const sheet = getCurrentSheet(state);
+    const sheet = sharedSheet ?? getCurrentSheet(state);
     return sheet.expenses.reduce((sum, item) => sum + toNumber(item.amount), 0);
   };
 
   const getRemainingAmount = () => {
-    const sheet = getCurrentSheet(state);
+    const sheet = sharedSheet ?? getCurrentSheet(state);
     const totalDebts = sheet.debts.reduce((sum, item) => sum + toNumber(item.amount), 0);
     const totalBills = sheet.bills.reduce((sum, item) => sum + toNumber(item.amount), 0);
     return getTotalIncome() - getTotalSavings() - getTotalExpenses() - totalDebts - totalBills;
   };
 
   const setDailyAllowanceSnapshot = (snapshot: AllowanceSnapshot) => {
+    if (readOnly) return;
     setState(prev => ({
       ...prev,
       sheets: prev.sheets.map(sheet =>
@@ -585,6 +713,48 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
+  const enableShare = async (visibility: ShareVisibility, allowedEmails: string[]) => {
+    if (!user) throw new Error('Sign in required');
+    const current = getCurrentSheet(state);
+    const shareId = current.share?.id ?? generateShareId();
+    const share: ShareSettings = {
+      id: shareId,
+      visibility,
+      allowedEmails,
+    };
+
+    setState(prev => ({
+      ...prev,
+      sheets: prev.sheets.map(sheet =>
+        sheet.id === prev.currentSheetId ? { ...sheet, share } : sheet
+      ),
+    }));
+
+    const shareDoc = {
+      ownerUid: user.uid,
+      sheetId: current.id,
+      sheetName: current.name,
+      visibility: share.visibility,
+      allowedEmails: share.allowedEmails,
+      sheet: { ...current, share },
+      updatedAt: Date.now(),
+    };
+    await setDoc(doc(db, 'shares', shareId), sanitizeState(shareDoc));
+  };
+
+  const disableShare = async () => {
+    if (!user) return;
+    const current = getCurrentSheet(state);
+    if (!current.share?.id) return;
+    await deleteDoc(doc(db, 'shares', current.share.id));
+    setState(prev => ({
+      ...prev,
+      sheets: prev.sheets.map(sheet =>
+        sheet.id === prev.currentSheetId ? { ...sheet, share: undefined } : sheet
+      ),
+    }));
+  };
+
   const signOut = async () => {
     await firebaseSignOut(auth);
   };
@@ -616,8 +786,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     <AppContext.Provider
       value={{
         ...state,
-        ...getCurrentSheet(state),
-        currentSheet: getCurrentSheet(state),
+        ...(sharedSheet ?? getCurrentSheet(state)),
+        currentSheet: sharedSheet ?? getCurrentSheet(state),
+        sheets: sharedSheet ? [sharedSheet] : state.sheets,
+        currentSheetId: sharedSheet ? sharedSheet.id : state.currentSheetId,
         setCurrentSheet,
         addSheet,
         renameSheet,
@@ -649,10 +821,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         user,
         authLoading,
         dataLoading,
+        shareLoading,
+        shareError,
+        readOnly,
         signIn,
         register,
         sendPasswordReset,
         resendVerification,
+        enableShare,
+        disableShare,
         signOut,
         themeTransitionId,
         setTheme,

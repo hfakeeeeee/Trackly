@@ -4,7 +4,7 @@ import { ConfirmToast } from './ConfirmToast';
 import { t } from '../i18n';
 
 export const Savings: React.FC = () => {
-  const { savings, addSavings, removeSavings, updateSavings, getTotalSavings, uiSettings } = useApp();
+  const { savings, addSavings, removeSavings, updateSavings, getTotalSavings, uiSettings, readOnly } = useApp();
   const [maxRows, setMaxRows] = useState(5);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const { language } = uiSettings;
@@ -83,6 +83,7 @@ export const Savings: React.FC = () => {
             onChange={(e) => handleCellChange(index, 'description', e.target.value)}
             className="input-ghost"
             placeholder={t(language, 'enterDescription')}
+            disabled={readOnly}
           />
         </td>
         <td className="py-2 px-3 border-r border-ink-100/70">
@@ -93,6 +94,7 @@ export const Savings: React.FC = () => {
             onChange={(e) => handleCellChange(index, 'amount', e.target.value)}
             className="input-ghost text-right tabular-nums"
             placeholder="0"
+            disabled={readOnly}
           />
         </td>
         <td className="py-2 px-3 text-center">
@@ -100,8 +102,9 @@ export const Savings: React.FC = () => {
             {item ? (
               <button
                 onClick={() => removeSavings(item.id)}
-                className="text-amber-600 hover:text-amber-700 font-medium p-1 transition-transform duration-200 hover:scale-110 active:scale-95"
+                className="text-amber-600 hover:text-amber-700 font-medium p-1 transition-transform duration-200 hover:scale-110 active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
                 title={t(language, 'clearRow')}
+                disabled={readOnly}
               >
                 <svg className="w-5 h-5 transition-transform duration-200 hover:-rotate-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H8m0 0l3.5-3.5M8 12l3.5 3.5M4 20h10a2 2 0 002-2v-2" />
@@ -110,8 +113,9 @@ export const Savings: React.FC = () => {
             ) : null}
             <button
               onClick={() => handleRemoveRow(index)}
-              className={`text-rose-600 hover:text-rose-700 font-medium p-1 transition-transform duration-200 hover:scale-110 active:scale-95 ${maxRows <= 1 ? 'opacity-40 pointer-events-none' : ''}`}
+              className={`text-rose-600 hover:text-rose-700 font-medium p-1 transition-transform duration-200 hover:scale-110 active:scale-95 disabled:opacity-50 disabled:pointer-events-none ${maxRows <= 1 ? 'opacity-40 pointer-events-none' : ''}`}
               title={t(language, 'removeRow')}
+              disabled={readOnly || maxRows <= 1}
             >
               <svg className="w-5 h-5 transition-transform duration-200 hover:rotate-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6h18M8 6V4h8v2M6 6l1 14a2 2 0 002 2h6a2 2 0 002-2l1-14M10 10v6M14 10v6" />
@@ -130,8 +134,9 @@ export const Savings: React.FC = () => {
         <div className="relative flex items-center gap-3">
           <button
             onClick={() => setMaxRows(maxRows + 1)}
-            className="btn-ghost group transition-transform duration-200 hover:scale-105 active:scale-95"
+            className="btn-ghost group transition-transform duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
             title={t(language, 'addRow')}
+            disabled={readOnly}
           >
             <svg className="w-5 h-5 animate-pop-in transition-transform duration-200 group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -139,8 +144,9 @@ export const Savings: React.FC = () => {
           </button>
           <button
             onClick={handleClearAll}
-            className="btn-ghost text-rose-600 hover:text-rose-700"
+            className="btn-ghost text-rose-600 hover:text-rose-700 disabled:opacity-50 disabled:pointer-events-none"
             title={t(language, 'confirmClearSavings')}
+            disabled={readOnly}
           >
             {t(language, 'clearAll')}
           </button>

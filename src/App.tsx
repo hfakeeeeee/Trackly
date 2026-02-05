@@ -15,9 +15,9 @@ import { useApp } from './AppContext';
 import { AuthScreen } from './components/AuthScreen';
 
 function AppContent() {
-  const { themeTransitionId, user, authLoading, dataLoading } = useApp();
+  const { themeTransitionId, user, authLoading, dataLoading, shareLoading, shareError, readOnly } = useApp();
 
-  if (authLoading || (user && dataLoading)) {
+  if (authLoading || shareLoading || (user && dataLoading)) {
     return (
       <div className="min-h-screen bg-sand-50 text-ink-900 flex items-center justify-center overflow-hidden">
         <style>
@@ -71,6 +71,27 @@ function AppContent() {
             <p className="text-xs uppercase tracking-[0.4em] text-ink-500 animate-pulse">Loading</p>
             <p className="mt-2 text-sm text-ink-600">Checking your wallet...</p>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (shareError) {
+    return (
+      <div className="min-h-screen bg-sand-50 text-ink-900 flex items-center justify-center">
+        <div className="card card-pad max-w-md text-center">
+          <h1 className="section-title font-heading mb-2">Share Link</h1>
+          <p className="text-sm text-ink-600 mb-4">{shareError}</p>
+          <button
+            className="rounded-xl bg-ink-900 px-4 py-2 text-sm font-semibold text-white"
+            onClick={() => {
+              const url = new URL(window.location.href);
+              url.searchParams.delete('share');
+              window.location.href = url.toString();
+            }}
+          >
+            Back to app
+          </button>
         </div>
       </div>
     );

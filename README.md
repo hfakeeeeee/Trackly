@@ -16,6 +16,7 @@ Modern personal expense tracker built with React, TypeScript, and Vite.
 - Auth: email/password login, register, forgot password
 - Email verification and password reset via Firebase
 - Cloud sync per user (Firestore)
+- Read-only sharing (public link, signed-in link, or invite-only)
 - Light/dark theme toggle, language toggle, responsive layout
 - Polished loading and auth screens with animations
 
@@ -64,12 +65,29 @@ VITE_FIREBASE_APP_ID=...
 
 Use this rule set to restrict access to each user:
 
+### Sharing Rules (Required for share links)
+
+Add this to allow read-only sharing:
+
 ```
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /shares/{shareId} {
+      allow read: if resource.data.visibility == 'public'
+        || (request.auth != null && resource.data.visibility == 'restricted')
+        || (request.auth != null && resource.data.visibility == 'invited'
+            && request.auth.token.email in resource.data.allowedEmails);
+
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.ownerUid;
+
+      allow update, delete: if request.auth != null
+        && request.auth.uid == resource.data.ownerUid;
     }
   }
 }
@@ -109,6 +127,15 @@ npm run build
 3. Add income, savings, debts, bills, and expenses.
 4. Daily Allowance locks for the day. Next Day Allowance updates live.
 5. Manage sheets from the header.
+6. Share sheets from the header Share button.
+
+## Sharing
+
+- **Public link**: anyone with the link can view.
+- **Signed-in**: viewers must sign in.
+- **Invite-only**: only listed emails can view.
+
+Sharing is read-only. Edits are disabled for viewers.
 
 ## Deployment (GitHub Pages)
 

@@ -4,7 +4,7 @@ import { ConfirmToast } from './ConfirmToast';
 import { t } from '../i18n';
 
 export const CategoryManager: React.FC = () => {
-  const { categories, addCategory, updateCategory, removeCategory, uiSettings } = useApp();
+  const { categories, addCategory, updateCategory, removeCategory, uiSettings, readOnly } = useApp();
   const [newCategory, setNewCategory] = useState('');
   const [showAddCategory, setShowAddCategory] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -49,15 +49,17 @@ export const CategoryManager: React.FC = () => {
         <div className="relative flex items-center gap-2">
           <button
             onClick={handleClearAll}
-            className="btn-ghost text-rose-600 hover:text-rose-700"
+            className="btn-ghost text-rose-600 hover:text-rose-700 disabled:opacity-50 disabled:pointer-events-none"
             title={t(language, 'confirmClearCategories')}
+            disabled={readOnly}
           >
             {t(language, 'clearAll')}
           </button>
           <button
             onClick={() => setShowAddCategory(!showAddCategory)}
-            className={`${showAddCategory ? 'btn-ghost' : 'btn-primary'} group transition-transform duration-200 hover:scale-105 active:scale-95`}
+            className={`${showAddCategory ? 'btn-ghost' : 'btn-primary'} group transition-transform duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:pointer-events-none`}
             title={showAddCategory ? t(language, 'cancel') : t(language, 'addCategory')}
+            disabled={readOnly}
           >
             {showAddCategory ? (
               <svg className="w-5 h-5 animate-pop-in transition-transform duration-200 group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,11 +93,13 @@ export const CategoryManager: React.FC = () => {
             onChange={(e) => setNewCategory(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
             className="input"
+            disabled={readOnly}
           />
           <button
             onClick={handleAddCategory}
-            className="btn-primary group transition-transform duration-200 hover:scale-105 active:scale-95"
+            className="btn-primary group transition-transform duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
             title={t(language, 'add')}
+            disabled={readOnly}
           >
             <svg className="w-5 h-5 animate-pop-in transition-transform duration-200 group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -127,6 +131,7 @@ export const CategoryManager: React.FC = () => {
                       value={cat.name}
                       onChange={(e) => handleNameChange(cat.id, e.target.value)}
                       className="input-ghost font-medium"
+                      disabled={readOnly}
                     />
                   </td>
                   <td className="py-2 px-3 text-right border-r border-ink-100/70">
@@ -138,8 +143,9 @@ export const CategoryManager: React.FC = () => {
                   <td className="py-2 px-3 text-center">
                     <button
                       onClick={() => removeCategory(cat.id)}
-                      className="text-amber-600 hover:text-amber-700 font-medium p-1 transition-transform duration-200 hover:scale-110 active:scale-95"
+                      className="text-amber-600 hover:text-amber-700 font-medium p-1 transition-transform duration-200 hover:scale-110 active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
                       title={t(language, 'clearRow')}
+                      disabled={readOnly}
                     >
                       <svg className="w-5 h-5 transition-transform duration-200 hover:-rotate-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H8m0 0l3.5-3.5M8 12l3.5 3.5M4 20h10a2 2 0 002-2v-2" />

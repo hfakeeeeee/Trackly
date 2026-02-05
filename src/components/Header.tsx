@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useApp } from '../AppContext';
 import { addDays, format, isAfter, parseISO, startOfDay } from 'date-fns';
 import { t } from '../i18n';
+import { ShareSheetModal } from './ShareSheetModal';
 
 export const Header: React.FC = () => {
   const {
@@ -23,9 +24,11 @@ export const Header: React.FC = () => {
     removeSheet,
     user,
     signOut,
+    readOnly,
   } = useApp();
   const { language, theme } = uiSettings;
   const [accountOpen, setAccountOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const accountRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -113,61 +116,76 @@ export const Header: React.FC = () => {
             <span>{t(language, 'tagline')}</span>
             <div className="flex items-center gap-2 rounded-full border border-ink-900/10 bg-white/70 px-2 py-1 dark:border-white/20 dark:bg-ink-900/60">
               <span className="text-xs uppercase tracking-wide text-ink-500 dark:text-white/60">{t(language, 'sheets')}</span>
-              <select
-                value={currentSheetId}
-                onChange={(e) => setCurrentSheet(e.target.value)}
-                className="rounded-full bg-transparent px-2 py-1 text-xs font-semibold text-ink-800 focus:outline-none dark:text-white/90"
-              >
-                {sheets.map((sheet) => (
-                  <option key={sheet.id} value={sheet.id}>
-                    {sheet.name}
-                  </option>
-                ))}
-              </select>
-              <button
-                onClick={() => {
-                  const current = sheets.find(sheet => sheet.id === currentSheetId);
-                  const name = window.prompt(t(language, 'renameSheet'), current?.name ?? '');
-                  if (name && name.trim()) {
-                    renameSheet(currentSheetId, name);
-                  }
-                }}
-                className="rounded-full bg-ink-900/10 px-2 py-1 text-xs font-semibold text-ink-800 transition hover:bg-ink-900/20 dark:bg-white/15 dark:text-white dark:hover:bg-white/25"
-                title={t(language, 'renameSheet')}
-              >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 11l6.232-6.232a2 2 0 012.828 0l1.172 1.172a2 2 0 010 2.828L13 15H9v-4z" />
-                </svg>
-              </button>
-              <button
-                onClick={() => {
-                  if (sheets.length <= 1) return;
-                  if (window.confirm(t(language, 'confirmRemoveSheet'))) {
-                    removeSheet(currentSheetId);
-                  }
-                }}
-                className="rounded-full bg-ink-900/10 px-2 py-1 text-xs font-semibold text-ink-800 transition hover:bg-ink-900/20 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white/15 dark:text-white dark:hover:bg-white/25"
-                title={t(language, 'removeSheet')}
-                disabled={sheets.length <= 1}
-              >
-                <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path d="M6 2a1 1 0 00-1 1v1H3.5a.5.5 0 000 1h13a.5.5 0 000-1H15V3a1 1 0 00-1-1H6zM4.5 6h11l-.74 10.36A2 2 0 0112.76 18H7.24a2 2 0 01-1.99-1.64L4.5 6z" />
-                </svg>
-              </button>
-              <button
-                onClick={() => {
-                  const name = window.prompt(t(language, 'newSheetName'));
-                  if (name && name.trim()) {
-                    addSheet(name.trim());
-                  } else if (name === '') {
-                    addSheet();
-                  }
-                }}
-                className="rounded-full bg-ink-900/10 px-2 py-1 text-xs font-semibold text-ink-800 transition hover:bg-ink-900/20 dark:bg-white/15 dark:text-white dark:hover:bg-white/25"
-                title={t(language, 'addSheet')}
-              >
-                +
-              </button>
+              {readOnly ? (
+                <span className="rounded-full bg-ink-900/10 px-2 py-1 text-xs font-semibold text-ink-800 dark:bg-white/15 dark:text-white/90">
+                  {t(language, 'viewOnly')}
+                </span>
+              ) : (
+                <>
+                  <select
+                    value={currentSheetId}
+                    onChange={(e) => setCurrentSheet(e.target.value)}
+                    className="rounded-full bg-transparent px-2 py-1 text-xs font-semibold text-ink-800 focus:outline-none dark:text-white/90"
+                  >
+                    {sheets.map((sheet) => (
+                      <option key={sheet.id} value={sheet.id}>
+                        {sheet.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => {
+                      const current = sheets.find(sheet => sheet.id === currentSheetId);
+                      const name = window.prompt(t(language, 'renameSheet'), current?.name ?? '');
+                      if (name && name.trim()) {
+                        renameSheet(currentSheetId, name);
+                      }
+                    }}
+                    className="rounded-full bg-ink-900/10 px-2 py-1 text-xs font-semibold text-ink-800 transition hover:bg-ink-900/20 dark:bg-white/15 dark:text-white dark:hover:bg-white/25"
+                    title={t(language, 'renameSheet')}
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 11l6.232-6.232a2 2 0 012.828 0l1.172 1.172a2 2 0 010 2.828L13 15H9v-4z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (sheets.length <= 1) return;
+                      if (window.confirm(t(language, 'confirmRemoveSheet'))) {
+                        removeSheet(currentSheetId);
+                      }
+                    }}
+                    className="rounded-full bg-ink-900/10 px-2 py-1 text-xs font-semibold text-ink-800 transition hover:bg-ink-900/20 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white/15 dark:text-white dark:hover:bg-white/25"
+                    title={t(language, 'removeSheet')}
+                    disabled={sheets.length <= 1}
+                  >
+                    <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path d="M6 2a1 1 0 00-1 1v1H3.5a.5.5 0 000 1h13a.5.5 0 000-1H15V3a1 1 0 00-1-1H6zM4.5 6h11l-.74 10.36A2 2 0 0112.76 18H7.24a2 2 0 01-1.99-1.64L4.5 6z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => {
+                      const name = window.prompt(t(language, 'newSheetName'));
+                      if (name && name.trim()) {
+                        addSheet(name.trim());
+                      } else if (name === '') {
+                        addSheet();
+                      }
+                    }}
+                    className="rounded-full bg-ink-900/10 px-2 py-1 text-xs font-semibold text-ink-800 transition hover:bg-ink-900/20 dark:bg-white/15 dark:text-white dark:hover:bg-white/25"
+                    title={t(language, 'addSheet')}
+                  >
+                    +
+                  </button>
+                  <button
+                    onClick={() => setShareOpen(true)}
+                    className="rounded-full bg-ink-900/10 px-2 py-1 text-xs font-semibold text-ink-800 transition hover:bg-ink-900/20 dark:bg-white/15 dark:text-white dark:hover:bg-white/25"
+                    title={t(language, 'share')}
+                  >
+                    {t(language, 'share')}
+                  </button>
+                </>
+              )}
             </div>
             <div className="flex items-center gap-2 rounded-full border border-ink-900/10 bg-white/70 px-2 py-1 dark:border-white/20 dark:bg-white/10">
               <span className="text-xs uppercase tracking-wide text-ink-500 dark:text-white/60">{t(language, 'theme')}</span>
@@ -244,6 +262,9 @@ export const Header: React.FC = () => {
           </div>
         </div>
       </div>
+      {!readOnly && (
+        <ShareSheetModal open={shareOpen} onClose={() => setShareOpen(false)} />
+      )}
     </header>
   );
 };

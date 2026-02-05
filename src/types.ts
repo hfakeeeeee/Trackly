@@ -40,6 +40,15 @@ export interface Category {
   total: number;
 }
 
+
+export type ShareVisibility = 'public' | 'restricted' | 'invited';
+
+export interface ShareSettings {
+  id: string;
+  visibility: ShareVisibility;
+  allowedEmails: string[];
+}
+
 export interface PeriodSettings {
   startDate: string;
   endDate: string;
@@ -69,5 +78,6 @@ export interface Sheet {
   bills: BillItem[];
   expenses: ExpenseItem[];
   categories: Category[];
+  share?: ShareSettings;
   allowanceSnapshot?: AllowanceSnapshot;
 }
