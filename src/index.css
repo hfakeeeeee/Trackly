@@ -297,9 +297,9 @@ html, body,
     @apply bg-sand-50/95 text-ink-900 dark:bg-ink-900/80 dark:text-ink-200;
   }
 
-  .table-row {
-    @apply border-b border-ink-200/70 hover:bg-sand-50/80 dark:border-ink-800/70 dark:hover:bg-ink-800/50;
-  }
+.table-row {
+  @apply border-b border-ink-200/70 hover:bg-sand-50/80 dark:border-ink-800/70 dark:hover:bg-ink-800/50;
+}
 }
 
 /* Explicit light mode overrides to keep sections bright and readable */
@@ -357,4 +357,76 @@ html, body,
 .dark select option {
   background-color: #0f172a;
   color: #f8fafc;
+}
+
+/* Mobile table layout: stack rows into cards */
+@media (max-width: 640px) {
+  .table-responsive thead {
+    display: none;
+  }
+
+  .table-responsive,
+  .table-responsive tbody,
+  .table-responsive tr,
+  .table-responsive td {
+    display: block;
+    width: 100%;
+  }
+
+  .table-responsive tr {
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.9);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+
+  .dark .table-responsive tr {
+    border-color: rgba(148, 163, 184, 0.22);
+    background: rgba(2, 6, 23, 0.6);
+  }
+
+  .table-responsive td {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  }
+
+  .dark .table-responsive td {
+    border-bottom-color: rgba(148, 163, 184, 0.18);
+  }
+
+  .table-responsive td::before {
+    content: attr(data-label);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  .dark .table-responsive td::before {
+    color: #94a3b8;
+  }
+
+  .table-responsive td:last-child {
+    border-bottom: 0;
+  }
+
+  .table-responsive input,
+  .table-responsive select,
+  .table-responsive textarea {
+    width: 100%;
+  }
+
+  .table-responsive select {
+    min-width: 0 !important;
+  }
+
+  .table-responsive .empty-row {
+    display: none;
+  }
 }

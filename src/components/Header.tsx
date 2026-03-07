@@ -102,7 +102,7 @@ export const Header: React.FC = () => {
         <div className="absolute -bottom-20 left-1/3 h-40 w-2/3 rounded-full bg-gradient-to-r from-teal-400/20 via-amber-300/20 to-rose-300/20 blur-2xl animate-aurora dark:from-teal-500/20 dark:via-amber-400/20 dark:to-rose-400/20" />
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-sand-100/80 to-transparent dark:from-ink-900/70" />
       </div>
-      <div className="relative px-6 py-10 sm:px-10 animate-fade-in">
+      <div className="relative px-4 py-6 sm:px-8 sm:py-10 lg:px-10 animate-fade-in">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="pill inline-block bg-ink-900/10 text-ink-700 dark:bg-white/15 dark:text-white">

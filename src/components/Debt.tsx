@@ -86,7 +86,7 @@ export const Debt: React.FC = () => {
     
     return (
       <tr key={index} className="table-row">
-        <td className="py-2 px-3 border-r border-ink-100/70">
+        <td className="py-2 px-3 border-r border-ink-100/70" data-label={t(language, 'description')}>
           <input
             type="text"
             value={item?.description || ''}
@@ -96,7 +96,7 @@ export const Debt: React.FC = () => {
             disabled={readOnly}
           />
         </td>
-        <td className="py-2 px-3 border-r border-ink-100/70">
+        <td className="py-2 px-3 border-r border-ink-100/70" data-label={t(language, 'dueDate')}>
           <input
             type="date"
             value={item?.date || ''}
@@ -106,18 +106,18 @@ export const Debt: React.FC = () => {
             disabled={readOnly}
           />
         </td>
-        <td className="py-2 px-3 border-r border-ink-100/70">
+        <td className="py-2 px-3 border-r border-ink-100/70" data-label={t(language, 'amount')}>
           <input
             type="text"
             inputMode="numeric"
             value={item?.amount ? formatCurrency(item.amount) : ''}
             onChange={(e) => handleCellChange(index, 'amount', e.target.value)}
-            className="input-ghost text-right tabular-nums"
+            className="input-ghost tabular-nums"
             placeholder="0"
             disabled={readOnly}
           />
         </td>
-        <td className="py-2 px-3 text-center">
+        <td className="py-2 px-3 text-center" data-label={t(language, 'action')}>
           <div className="flex items-center justify-center gap-2">
             {item ? (
               <button
@@ -188,12 +188,12 @@ export const Debt: React.FC = () => {
       </div>
 
       <div className="table-shell">
-        <table className="w-full">
+        <table className="w-full table-responsive">
           <thead className="table-head">
             <tr className="border-b border-ink-100/80">
               <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 border-r border-ink-100/70">{t(language, 'description')}</th>
               <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-32 border-r border-ink-100/70">{t(language, 'dueDate')}</th>
-              <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-40 border-r border-ink-100/70">{t(language, 'amount')}</th>
+              <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-40 border-r border-ink-100/70">{t(language, 'amount')}</th>
               <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-20">{t(language, 'action')}</th>
             </tr>
           </thead>

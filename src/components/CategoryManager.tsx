@@ -109,11 +109,11 @@ export const CategoryManager: React.FC = () => {
       )}
 
       <div className="table-shell flex-1">
-        <table className="w-full">
+        <table className="w-full table-responsive">
           <thead className="sticky top-0 table-head">
             <tr className="border-b border-ink-100/80">
               <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 border-r border-ink-100/70">{t(language, 'expense')}</th>
-              <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-40 border-r border-ink-100/70">{t(language, 'amount')}</th>
+              <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-40 border-r border-ink-100/70">{t(language, 'amount')}</th>
               <th className="text-right py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-24 border-r border-ink-100/70">{t(language, 'percentage')}</th>
               <th className="text-center py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 w-16">{t(language, 'action')}</th>
             </tr>
@@ -125,7 +125,7 @@ export const CategoryManager: React.FC = () => {
               
               return (
                 <tr key={cat.id} className="table-row">
-                  <td className="py-2 px-3 border-r border-ink-100/70">
+                  <td className="py-2 px-3 border-r border-ink-100/70" data-label={t(language, 'expense')}>
                     <input
                       type="text"
                       value={cat.name}
@@ -134,13 +134,13 @@ export const CategoryManager: React.FC = () => {
                       disabled={readOnly}
                     />
                   </td>
-                  <td className="py-2 px-3 text-right border-r border-ink-100/70">
+                  <td className="py-2 px-3 text-left border-r border-ink-100/70" data-label={t(language, 'amount')}>
                     <span className="font-semibold text-teal-700 dark:text-teal-300">{formatCurrency(cat.total)}</span>
                   </td>
-                  <td className="py-2 px-3 text-right border-r border-ink-100/70">
+                  <td className="py-2 px-3 text-right border-r border-ink-100/70" data-label={t(language, 'percentage')}>
                     <span className="font-semibold text-ink-700 dark:text-ink-200">{percentage}%</span>
                   </td>
-                  <td className="py-2 px-3 text-center">
+                  <td className="py-2 px-3 text-center" data-label={t(language, 'action')}>
                     <button
                       onClick={() => removeCategory(cat.id)}
                       className="text-amber-600 hover:text-amber-700 font-medium p-1 transition-transform duration-200 hover:scale-110 active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
@@ -156,11 +156,11 @@ export const CategoryManager: React.FC = () => {
               );
             })}
             {Array.from({ length: Math.max(0, MIN_ROWS - categories.length) }, (_, index) => (
-              <tr key={`empty-${index}`} className="table-row">
-                <td className="py-2 px-3 border-r border-ink-100/70">&nbsp;</td>
-                <td className="py-2 px-3 border-r border-ink-100/70">&nbsp;</td>
-                <td className="py-2 px-3 border-r border-ink-100/70">&nbsp;</td>
-                <td className="py-2 px-3">&nbsp;</td>
+              <tr key={`empty-${index}`} className="table-row empty-row">
+                <td className="py-2 px-3 border-r border-ink-100/70" data-label={t(language, 'expense')}>&nbsp;</td>
+                <td className="py-2 px-3 border-r border-ink-100/70" data-label={t(language, 'amount')}>&nbsp;</td>
+                <td className="py-2 px-3 border-r border-ink-100/70" data-label={t(language, 'percentage')}>&nbsp;</td>
+                <td className="py-2 px-3" data-label={t(language, 'action')}>&nbsp;</td>
               </tr>
             ))}
           </tbody>
