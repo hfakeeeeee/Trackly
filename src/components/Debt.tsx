@@ -8,6 +8,7 @@ export const Debt: React.FC = () => {
   const [maxRows, setMaxRows] = useState(5);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const { language } = uiSettings;
+  const visibleRows = Math.max(maxRows, debts.length);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -133,9 +134,9 @@ export const Debt: React.FC = () => {
             ) : null}
             <button
               onClick={() => handleRemoveRow(index)}
-              className={`text-rose-600 hover:text-rose-700 font-medium p-1 transition-transform duration-200 hover:scale-110 active:scale-95 disabled:opacity-50 disabled:pointer-events-none ${maxRows <= 1 ? 'opacity-40 pointer-events-none' : ''}`}
+              className={`text-rose-600 hover:text-rose-700 font-medium p-1 transition-transform duration-200 hover:scale-110 active:scale-95 disabled:opacity-50 disabled:pointer-events-none ${visibleRows <= 1 ? 'opacity-40 pointer-events-none' : ''}`}
               title={t(language, 'removeRow')}
-              disabled={readOnly || maxRows <= 1}
+              disabled={readOnly || visibleRows <= 1}
             >
               <svg className="w-5 h-5 transition-transform duration-200 hover:rotate-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6h18M8 6V4h8v2M6 6l1 14a2 2 0 002 2h6a2 2 0 002-2l1-14M10 10v6M14 10v6" />
@@ -198,7 +199,7 @@ export const Debt: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {Array.from({ length: maxRows }, (_, index) => renderRow(index))}
+            {Array.from({ length: visibleRows }, (_, index) => renderRow(index))}
           </tbody>
         </table>
       </div>
