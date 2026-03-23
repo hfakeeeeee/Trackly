@@ -4,12 +4,12 @@ import { ConfirmToast } from './ConfirmToast';
 import { t } from '../i18n';
 
 export const CategoryManager: React.FC = () => {
-  const { categories, addCategory, updateCategory, removeCategory, uiSettings, readOnly } = useApp();
+  const { categories, expenseRowCount, addCategory, updateCategory, removeCategory, uiSettings, readOnly } = useApp();
   const [newCategory, setNewCategory] = useState('');
   const [showAddCategory, setShowAddCategory] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const MIN_ROWS = 50;
   const { language } = uiSettings;
+  const visibleRows = Math.max(expenseRowCount, categories.length);
 
   const handleAddCategory = () => {
     if (newCategory.trim()) {
@@ -43,7 +43,7 @@ export const CategoryManager: React.FC = () => {
   };
 
   return (
-    <section className="card card-pad mb-6 h-full flex flex-col">
+    <section className="card card-pad mb-6">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <h2 className="section-title font-heading">{t(language, 'categories')}</h2>
         <div className="relative flex items-center gap-2">
@@ -108,7 +108,7 @@ export const CategoryManager: React.FC = () => {
         </div>
       )}
 
-      <div className="table-shell flex-1">
+      <div className="table-shell">
         <table className="w-full table-responsive">
           <thead className="sticky top-0 table-head">
             <tr className="border-b border-ink-100/80">
@@ -155,7 +155,7 @@ export const CategoryManager: React.FC = () => {
                   </tr>
               );
             })}
-            {Array.from({ length: Math.max(0, MIN_ROWS - categories.length) }, (_, index) => (
+            {Array.from({ length: Math.max(0, visibleRows - categories.length) }, (_, index) => (
               <tr key={`empty-${index}`} className="table-row empty-row">
                 <td className="py-2 px-3 border-r border-ink-100/70" data-label={t(language, 'expense')}>&nbsp;</td>
                 <td className="py-2 px-3 border-r border-ink-100/70" data-label={t(language, 'amount')}>&nbsp;</td>

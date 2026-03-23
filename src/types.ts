@@ -72,6 +72,7 @@ export interface Sheet {
   id: string;
   name: string;
   periodSettings: PeriodSettings;
+  expenseRowCount: number;
   income: IncomeItem[];
   debts: DebtItem[];
   savings: SavingsItem[];

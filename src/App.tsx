@@ -134,11 +134,9 @@ function AppContent() {
             <div className="lg:col-span-3">
               <ExpenseTracker />
             </div>
-            <div className="lg:col-span-2 flex flex-col gap-6 h-full">
+            <div className="lg:col-span-2 flex flex-col gap-6">
               <ExpenseChart />
-              <div className="flex-1">
-                <CategoryManager />
-              </div>
+              <CategoryManager />
             </div>
           </div>
         </div>

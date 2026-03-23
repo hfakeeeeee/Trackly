@@ -4,11 +4,10 @@ import { ConfirmToast } from './ConfirmToast';
 import { t } from '../i18n';
 
 export const ExpenseTracker: React.FC = () => {
-  const { expenses, categories, addExpense, removeExpense, updateExpense, uiSettings, readOnly } = useApp();
-  const [maxRows, setMaxRows] = useState(50);
+  const { expenses, categories, addExpense, removeExpense, updateExpense, expenseRowCount, setExpenseRowCount, uiSettings, readOnly } = useApp();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const { language } = uiSettings;
-  const visibleRows = Math.max(maxRows, expenses.length);
+  const visibleRows = Math.max(expenseRowCount, expenses.length);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -87,7 +86,7 @@ export const ExpenseTracker: React.FC = () => {
     if (item) {
       removeExpense(item.id);
     }
-    setMaxRows((prev) => (prev > 1 ? prev - 1 : prev));
+    setExpenseRowCount(visibleRows - 1);
   };
 
   const renderRow = (index: number) => {
@@ -177,7 +176,7 @@ export const ExpenseTracker: React.FC = () => {
         <h2 className="section-title font-heading">{t(language, 'expenseTracker')}</h2>
         <div className="relative flex items-center gap-3">
           <button
-            onClick={() => setMaxRows(maxRows + 1)}
+            onClick={() => setExpenseRowCount(visibleRows + 1)}
             className="btn-ghost group transition-transform duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
             title={t(language, 'addRow')}
             disabled={readOnly}

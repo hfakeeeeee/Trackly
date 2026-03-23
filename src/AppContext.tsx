@@ -11,6 +11,7 @@ interface AppContextType extends AppState, Sheet {
   addSheet: (name?: string) => void;
   renameSheet: (id: string, name: string) => void;
   removeSheet: (id: string) => void;
+  setExpenseRowCount: (count: number) => void;
   addIncome: (item: Omit<IncomeItem, 'id'>) => void;
   removeIncome: (id: string) => void;
   updateIncome: (id: string, item: Partial<Omit<IncomeItem, 'id'>>) => void;
@@ -55,6 +56,7 @@ interface AppContextType extends AppState, Sheet {
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
+const DEFAULT_EXPENSE_ROW_COUNT = 50;
 
 const defaultCategories = [
   { id: '1', name: 'Food & Dining', total: 0 },
@@ -72,6 +74,7 @@ const createDefaultSheet = (name: string): Sheet => ({
     startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
     endDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0],
   },
+  expenseRowCount: DEFAULT_EXPENSE_ROW_COUNT,
   income: [],
   debts: [],
   savings: [],
@@ -106,6 +109,11 @@ const toNumber = (value: unknown) => {
 
 const normalizeSheet = (sheet: Sheet): Sheet => ({
   ...sheet,
+  expenseRowCount: Math.max(
+    DEFAULT_EXPENSE_ROW_COUNT,
+    toNumber(sheet.expenseRowCount),
+    sheet.expenses.length
+  ),
   income: sheet.income.map(item => ({ ...item, amount: toNumber(item.amount) })),
   debts: sheet.debts.map(item => ({ ...item, amount: toNumber(item.amount) })),
   savings: sheet.savings.map(item => ({ ...item, amount: toNumber(item.amount) })),
@@ -138,6 +146,11 @@ const buildStateFromData = (parsed?: Partial<AppState> & Partial<Sheet>): AppSta
     id: baseState.sheets[0].id,
     name: 'Current Month',
     periodSettings: parsed.periodSettings ?? baseState.sheets[0].periodSettings,
+    expenseRowCount: Math.max(
+      DEFAULT_EXPENSE_ROW_COUNT,
+      toNumber(parsed.expenseRowCount),
+      (parsed.expenses ?? []).length
+    ),
     income: (parsed.income ?? []).map(item => ({ ...item, amount: toNumber(item.amount) })),
     debts: (parsed.debts ?? []).map(item => ({ ...item, amount: toNumber(item.amount) })),
     savings: (parsed.savings ?? []).map(item => ({ ...item, amount: toNumber(item.amount) })),
@@ -370,6 +383,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         currentSheetId: nextSheetId,
       };
     });
+  };
+
+  const setExpenseRowCount = (count: number) => {
+    if (readOnly) return;
+    setState(prev => ({
+      ...prev,
+      sheets: prev.sheets.map(sheet =>
+        sheet.id === prev.currentSheetId
+          ? { ...sheet, expenseRowCount: Math.max(1, count, sheet.expenses.length) }
+          : sheet
+      ),
+    }));
   };
 
   const addIncome = (item: Omit<IncomeItem, 'id'>) => {
@@ -794,6 +819,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         addSheet,
         renameSheet,
         removeSheet,
+        setExpenseRowCount,
         addIncome,
         removeIncome,
         updateIncome,
