@@ -12,6 +12,7 @@ import { FinancialOverviewChart } from './components/FinancialOverviewChart';
 import { CategoryManager } from './components/CategoryManager';
 import { Footer } from './components/Footer';
 import { ThemeWipe } from './components/ThemeWipe';
+import { ScrollToTopButton } from './components/ScrollToTopButton';
 import { useApp } from './AppContext';
 import { AuthScreen } from './components/AuthScreen';
 
@@ -145,6 +146,7 @@ function AppContent() {
       </main>
 
       <Footer />
+      <ScrollToTopButton />
     </div>
   );
 }
