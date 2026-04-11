@@ -5,7 +5,7 @@ import { t } from '../i18n';
 
 export const Bills: React.FC = () => {
   const { bills, addBill, removeBill, updateBill, uiSettings, readOnly } = useApp();
-  const [maxRows, setMaxRows] = useState(20);
+  const [maxRows, setMaxRows] = useState(12);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const { language } = uiSettings;
   const visibleRows = Math.max(maxRows, bills.length);

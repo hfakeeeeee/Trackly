@@ -5,6 +5,7 @@ import { Income } from './components/Income';
 import { Debt } from './components/Debt';
 import { Savings } from './components/Savings';
 import { Bills } from './components/Bills';
+import { DailyExpenseChart } from './components/DailyExpenseChart';
 import { ExpenseTracker } from './components/ExpenseTracker';
 import { ExpenseChart } from './components/ExpenseChart';
 import { FinancialOverviewChart } from './components/FinancialOverviewChart';
@@ -124,8 +125,9 @@ function AppContent() {
               <Debt />
               <Savings />
             </div>
-            <div className="lg:col-span-7 h-full">
+            <div className="lg:col-span-7 flex h-full flex-col gap-6">
               <Bills />
+              <DailyExpenseChart />
             </div>
           </div>
 

@@ -5,7 +5,7 @@ import { t } from '../i18n';
 
 export const Savings: React.FC = () => {
   const { savings, addSavings, removeSavings, updateSavings, getTotalSavings, uiSettings, readOnly } = useApp();
-  const [maxRows, setMaxRows] = useState(5);
+  const [maxRows, setMaxRows] = useState(4);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const { language } = uiSettings;
   const visibleRows = Math.max(maxRows, savings.length);
