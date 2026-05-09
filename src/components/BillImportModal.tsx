@@ -891,15 +891,15 @@ export const BillImportModal: React.FC<BillImportModalProps> = ({ open, onClose 
           )}
 
           {drafts.map((draft, index) => (
-            <div key={`${draft.description}-${index}`} className="grid gap-4 rounded-xl border border-ink-200/70 bg-sand-50/70 p-4 dark:border-ink-700/70 dark:bg-ink-950/40 sm:grid-cols-2">
+            <div key={`${draft.description}-${index}`} className="grid gap-4 rounded-xl border border-ink-200/70 bg-sand-50/70 p-4 shadow-soft dark:border-ink-600/70 dark:bg-ink-800/70 sm:grid-cols-2">
               <div className="sm:col-span-2 flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400">
+                <p className="text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-200">
                   {t(language, 'billDraft')} {index + 1}
                 </p>
-                <span className="text-xs font-semibold text-ink-500 dark:text-ink-300">{t(language, 'billConfidence')}: {draft.confidence}%</span>
+                <span className="text-xs font-semibold text-ink-500 dark:text-teal-200">{t(language, 'billConfidence')}: {draft.confidence}%</span>
               </div>
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400 mb-2">{t(language, 'importTo')}</label>
+                <label className="block text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 mb-2">{t(language, 'importTo')}</label>
                 <select value={draft.target} onChange={(e) => handleDraftChange(index, 'target', e.target.value)} className="input">
                   {importTargets.map((target) => (
                     <option key={target} value={target}>
@@ -910,14 +910,14 @@ export const BillImportModal: React.FC<BillImportModalProps> = ({ open, onClose 
               </div>
               {(draft.target === 'expense' || draft.target === 'bill' || draft.target === 'debt') && (
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400 mb-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 mb-2">
                     {draft.target === 'expense' ? t(language, 'date') : t(language, 'dueDate')}
                   </label>
                   <input type="date" value={draft.date} onChange={(e) => handleDraftChange(index, 'date', e.target.value)} className="input" />
                 </div>
               )}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400 mb-2">{t(language, 'amount')}</label>
+                <label className="block text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 mb-2">{t(language, 'amount')}</label>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -928,12 +928,12 @@ export const BillImportModal: React.FC<BillImportModalProps> = ({ open, onClose 
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400 mb-2">{t(language, 'description')}</label>
+                <label className="block text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 mb-2">{t(language, 'description')}</label>
                 <input value={draft.description} onChange={(e) => handleDraftChange(index, 'description', e.target.value)} className="input" />
               </div>
               {draft.target === 'expense' && (
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400 mb-2">{t(language, 'category')}</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300 mb-2">{t(language, 'category')}</label>
                   <select value={draft.category} onChange={(e) => handleDraftChange(index, 'category', e.target.value)} className="input">
                     <option value="">{t(language, 'select')}</option>
                     {categories.map((category) => (
@@ -945,7 +945,7 @@ export const BillImportModal: React.FC<BillImportModalProps> = ({ open, onClose 
                 </div>
               )}
               <div className="sm:col-span-2">
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400">{t(language, 'billRawText')}</label>
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-300">{t(language, 'billRawText')}</label>
                 <textarea className="input min-h-[110px] text-xs" value={draft.rawText} readOnly />
               </div>
             </div>
