@@ -4,6 +4,7 @@ import { useApp } from '../AppContext';
 import { t } from '../i18n';
 
 type DraftExpense = {
+  target: ImportTarget;
   date: string;
   description: string;
   amount: number;
@@ -18,6 +19,9 @@ type BillImportModalProps = {
   onClose: () => void;
 };
 
+type ImportTarget = 'expense' | 'bill' | 'income' | 'debt' | 'savings';
+const importTargets: ImportTarget[] = ['expense', 'bill', 'income', 'debt', 'savings'];
+
 type LineItem = {
   name: string;
   quantity: number;
@@ -25,7 +29,7 @@ type LineItem = {
   amount: number;
 };
 
-type DocumentType = 'receipt' | 'bank_transfer';
+type DocumentType = 'receipt' | 'bank_transfer' | 'utility_bill';
 
 const amountPattern = /\d{1,3}(?:[.,\s]\d{3})+(?:[.,]\d{1,2})?|\d{4,}/g;
 const totalKeywords = [
@@ -48,8 +52,13 @@ const totalKeywords = [
 ];
 const finalTotalKeywords = ['t cong', 't.cong', 'tong cong', 'tong', 'grand total', 'amount due', 'balance due', 'khach tra', 'phai tra', 'vnd'];
 const subtotalKeywords = ['thanh tien', 'subtotal'];
-const amountIgnoredKeywords = ['ngay', 'so h', 'so h.d', 'so hd', 'lien', 'receipt no', 'invoice no', 'phone', 'dt:', 'dien thoai', 'giam', 'discount'];
+const amountIgnoredKeywords = ['ngay', 'so h', 'so h.d', 'so hd', 'lien', 'receipt no', 'invoice no', 'phone', 'dt:', 'dien thoai', 'giam', 'discount', 'so du', 'balance'];
 const bankTransferKeywords = [
+  'chi tiet giao dich',
+  'ngay giao dich',
+  'noi dung giao dich',
+  'so tien giao dich',
+  'so tham chieu',
   'chuyen khoan',
   'giao dich thanh cong',
   'chuyen tien',
@@ -63,9 +72,31 @@ const bankTransferKeywords = [
   'beneficiary',
   'recipient',
 ];
-const bankAmountKeywords = ['so tien', 'amount', 'transfer amount', 'chuyen khoan', 'chuyen tien', 'da chuyen', 'vnd'];
-const bankIgnoredAmountKeywords = ['ma giao dich', 'ma gd', 'reference', 'ref', 'tai khoan', 'stk', 'account', 'ngay', 'date', 'time', 'phone', 'dt:'];
+const bankAmountKeywords = ['so tien giao dich', 'so tien', 'amount', 'transfer amount', 'chuyen khoan', 'chuyen tien', 'da chuyen', 'vnd'];
+const bankPrimaryAmountKeywords = ['so tien giao dich', 'transaction amount', 'transfer amount'];
+const bankIgnoredAmountKeywords = ['ma giao dich', 'ma gd', 'reference', 'ref', 'tai khoan', 'stk', 'account', 'ngay', 'date', 'time', 'phone', 'dt:', 'so du', 'balance', 'noi dung giao dich'];
 const bankDescriptionKeywords = ['nguoi nhan', 'den', 'toi', 'recipient', 'beneficiary', 'noi dung', 'content', 'description'];
+const incomeKeywords = ['salary', 'payroll', 'luong', 'tra luong', 'traluong', 'thu nhap', 'received', 'incoming', 'nhan tien', 'duoc chuyen', 'credit'];
+const billKeywords = ['bill', 'invoice', 'hoa don', 'due date', 'han thanh toan', 'electric', 'water', 'internet', 'rent', 'subscription'];
+const debtKeywords = ['loan', 'debt', 'installment', 'tra gop', 'vay', 'no ', 'credit card'];
+const savingsKeywords = ['saving', 'savings', 'deposit', 'interest', 'tiet kiem', 'lai suat'];
+const utilityBillKeywords = ['dien luc', 'nuoc', 'viettel', 'cuoc tra sau', 'nha cung cap', 'ky thanh toan', 'ma khach hang', 'ma thue bao', 'hoa don'];
+const utilityProviderKeywords = ['dien luc', 'nuoc', 'viettel', 'cuoc tra sau'];
+const utilityAmountKeywords = ['so tien ghi nhan', 'so tien', 'ghi nhan'];
+const utilityIgnoredAmountKeywords = [
+  'ma giao dich',
+  'ma khach hang',
+  'ma thue bao',
+  'tong phi',
+  'thuong xu',
+  'so du',
+  'balance',
+  'ky thanh toan',
+  'thoi gian',
+  'ngay',
+  'dia chi',
+  'ten khach hang',
+];
 const merchantIgnoredKeywords = [
   'receipt',
   'invoice',
@@ -111,16 +142,37 @@ const parseMoney = (value: string) => {
   return Number(digits);
 };
 
-const preprocessImage = async (file: File) => {
+const parseOcrMoney = (value: string) => {
+  return parseMoney(value.replace(/[oO]/g, '0'));
+};
+
+const getBankAmountMatches = (line: string, primaryLine: boolean) => {
+  if (!primaryLine) return line.match(amountPattern) ?? [];
+
+  const correctedLine = line.replace(/[oO]/g, '0');
+  const currencyMatch = correctedLine.match(/[+-]?\s*\d[\d.,\s]*\d(?=\s*(?:vnd|d|₫|đ))/i);
+  if (currencyMatch) return [currencyMatch[0]];
+
+  return correctedLine.match(/[+-]?\s*\d[\d.,\s]*\d/g) ?? [];
+};
+
+const loadImage = async (file: Blob) => {
   const imageUrl = URL.createObjectURL(file);
   try {
-    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+    return await new Promise<HTMLImageElement>((resolve, reject) => {
       const img = new Image();
       img.onload = () => resolve(img);
       img.onerror = reject;
       img.src = imageUrl;
     });
+  } finally {
+    URL.revokeObjectURL(imageUrl);
+  }
+};
 
+const preprocessImage = async (file: File) => {
+  const image = await loadImage(file);
+  try {
     const maxSide = Math.max(image.naturalWidth, image.naturalHeight);
     const scale = Math.min(3, Math.max(1.5, 2400 / maxSide));
     const canvas = document.createElement('canvas');
@@ -161,8 +213,38 @@ const preprocessImage = async (file: File) => {
       canvas.toBlob((blob) => resolve(blob ?? file), 'image/png');
     });
   } finally {
-    URL.revokeObjectURL(imageUrl);
   }
+};
+
+const cropTopAmountArea = async (file: File) => {
+  const image = await loadImage(file);
+  const canvas = document.createElement('canvas');
+  const sourceY = Math.round(image.naturalHeight * 0.08);
+  const sourceHeight = Math.round(image.naturalHeight * 0.28);
+  const scale = Math.min(3, Math.max(1.5, 2200 / image.naturalWidth));
+  canvas.width = Math.round(image.naturalWidth * scale);
+  canvas.height = Math.round(sourceHeight * scale);
+
+  const context = canvas.getContext('2d');
+  if (!context) return file;
+
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = 'high';
+  context.drawImage(
+    image,
+    0,
+    sourceY,
+    image.naturalWidth,
+    sourceHeight,
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+  return await new Promise<Blob>((resolve) => {
+    canvas.toBlob((blob) => resolve(blob ?? file), 'image/png');
+  });
 };
 
 const getTodayKey = () => {
@@ -173,8 +255,33 @@ const getTodayKey = () => {
 
 const detectDocumentType = (rawText: string): DocumentType => {
   const normalized = normalizeText(rawText);
+  const utilityMatches = utilityBillKeywords.filter((keyword) => normalized.includes(keyword)).length;
+  if (utilityMatches >= 2) {
+    return 'utility_bill';
+  }
+  if (normalized.includes('so tien giao dich') || normalized.includes('chi tiet giao dich')) {
+    return 'bank_transfer';
+  }
   const bankMatches = bankTransferKeywords.filter((keyword) => normalized.includes(keyword)).length;
   return bankMatches >= 2 ? 'bank_transfer' : 'receipt';
+};
+
+const hasAnyKeyword = (normalizedText: string, keywords: string[]) => {
+  return keywords.some((keyword) => normalizedText.includes(keyword));
+};
+
+const classifyImportTarget = (rawText: string, documentType: DocumentType): ImportTarget => {
+  const normalized = normalizeText(rawText);
+
+  if (documentType === 'utility_bill') return 'bill';
+  if (hasAnyKeyword(normalized, savingsKeywords)) return 'savings';
+  if (hasAnyKeyword(normalized, debtKeywords)) return 'debt';
+  if (hasAnyKeyword(normalized, incomeKeywords)) return 'income';
+  if (documentType === 'bank_transfer' && /\+\s*\d/.test(rawText)) return 'income';
+  if (hasAnyKeyword(normalized, billKeywords) && !hasAnyKeyword(normalized, ['ban hang', 'phieu tinh tien'])) return 'bill';
+  if (documentType === 'bank_transfer') return 'expense';
+
+  return 'expense';
 };
 
 const findMerchant = (lines: string[]) => {
@@ -214,7 +321,7 @@ const findAmount = (lines: string[]) => {
     const matches = line.match(amountPattern) ?? [];
     if (shouldIgnoreAmountLine(normalized)) return;
     matches.forEach((match) => {
-      const amount = parseMoney(match);
+      const amount = parseOcrMoney(match);
       if (amount <= 0) return;
       if (amount > 100_000_000) return;
 
@@ -290,6 +397,68 @@ const findFallbackCategory = (categories: { name: string }[]) => {
   return categories.find((category) => normalizeText(category.name).includes('other'))?.name ?? categories[0]?.name ?? '';
 };
 
+const findUtilityProvider = (lines: string[]) => {
+  const providerLine = lines.find((line) => {
+    const normalized = normalizeText(line);
+    return utilityProviderKeywords.some((keyword) => normalized.includes(keyword)) && !normalized.includes('danh muc');
+  });
+
+  if (!providerLine) return 'Utility bill';
+
+  return providerLine
+    .replace(/^[<›\s@©]+/, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+const findUtilityAmount = (lines: string[]) => {
+  const scoredAmounts: Array<{ amount: number; score: number }> = [];
+
+  lines.forEach((line, index) => {
+    const normalized = normalizeText(line);
+    if (utilityIgnoredAmountKeywords.some((keyword) => normalized.includes(keyword))) return;
+
+    const hasAmountKeyword = utilityAmountKeywords.some((keyword) => normalized.includes(keyword));
+    const hasCurrency = /vnd|d\b/i.test(normalized) || line.includes('₫') || line.includes('đ') || line.includes('Ä‘');
+    if (!hasAmountKeyword && !hasCurrency) return;
+
+    const matches = getBankAmountMatches(line, hasAmountKeyword || hasCurrency);
+    const isProviderLine = utilityProviderKeywords.some((keyword) => normalized.includes(keyword));
+
+    matches.forEach((match) => {
+      const amount = parseOcrMoney(match);
+      if (amount <= 0 || amount > 100_000_000) return;
+      const score = amount + (hasAmountKeyword ? 4_000_000_000 : 0) + (isProviderLine ? 2_000_000_000 : 0) + (hasCurrency ? 700_000_000 : 0) - index;
+      scoredAmounts.push({ amount, score });
+    });
+  });
+
+  if (scoredAmounts.length === 0) return 0;
+  scoredAmounts.sort((a, b) => b.score - a.score);
+  return scoredAmounts[0].amount;
+};
+
+const buildUtilityBillDraft = (rawText: string, categories: { name: string }[]): DraftExpense => {
+  const lines = rawText
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const description = findUtilityProvider(lines);
+  const amount = findUtilityAmount(lines);
+  const confidencePieces = [amount > 0, description !== 'Utility bill'].filter(Boolean).length;
+
+  return {
+    target: classifyImportTarget(rawText, 'utility_bill'),
+    date: getTodayKey(),
+    description,
+    amount,
+    category: findFallbackCategory(categories),
+    merchant: description,
+    confidence: Math.round((confidencePieces / 2) * 100),
+    rawText,
+  };
+};
+
 const cleanBankDescriptionValue = (line: string) => {
   return line
     .replace(/^(nguoi nhan|den|toi|recipient|beneficiary|noi dung|content|description)\s*[:\-]?\s*/i, '')
@@ -302,16 +471,24 @@ const findBankAmount = (lines: string[]) => {
 
   lines.forEach((line, index) => {
     const normalized = normalizeText(line);
-    if (bankIgnoredAmountKeywords.some((keyword) => normalized.includes(keyword))) return;
+    const hasPrimaryAmountKeyword = bankPrimaryAmountKeywords.some((keyword) => normalized.includes(keyword));
+    if (!hasPrimaryAmountKeyword && bankIgnoredAmountKeywords.some((keyword) => normalized.includes(keyword))) return;
 
-    const matches = line.match(amountPattern) ?? [];
+    const matches = getBankAmountMatches(line, hasPrimaryAmountKeyword);
     const hasAmountKeyword = bankAmountKeywords.some((keyword) => normalized.includes(keyword));
+    const hasIncomingSign = /\+\s*\d/.test(line);
     const hasCurrency = /vnd|d\b/i.test(normalized) || line.includes('₫') || line.includes('đ');
 
     matches.forEach((match) => {
       const amount = parseMoney(match);
       if (amount <= 0 || amount > 100_000_000) return;
-      const score = amount + (hasAmountKeyword ? 2_000_000_000 : 0) + (hasCurrency ? 700_000_000 : 0) - index;
+      const score =
+        amount +
+        (hasPrimaryAmountKeyword ? 4_000_000_000 : 0) +
+        (hasAmountKeyword ? 2_000_000_000 : 0) +
+        (hasIncomingSign ? 1_000_000_000 : 0) +
+        (hasCurrency ? 700_000_000 : 0) -
+        index;
       scoredAmounts.push({ amount, score });
     });
   });
@@ -350,6 +527,7 @@ const buildBankTransferDraft = (rawText: string, categories: { name: string }[])
   const confidencePieces = [amount > 0, description !== 'Bank transfer'].filter(Boolean).length;
 
   return {
+    target: classifyImportTarget(rawText, 'bank_transfer'),
     date: getTodayKey(),
     description,
     amount,
@@ -361,7 +539,13 @@ const buildBankTransferDraft = (rawText: string, categories: { name: string }[])
 };
 
 const buildDraft = (rawText: string, categories: { name: string }[]): DraftExpense => {
-  if (detectDocumentType(rawText) === 'bank_transfer') {
+  const documentType = detectDocumentType(rawText);
+
+  if (documentType === 'utility_bill') {
+    return buildUtilityBillDraft(rawText, categories);
+  }
+
+  if (documentType === 'bank_transfer') {
     return buildBankTransferDraft(rawText, categories);
   }
 
@@ -383,6 +567,7 @@ const buildDraft = (rawText: string, categories: { name: string }[]): DraftExpen
         : 'Imported bill';
 
   return {
+    target: classifyImportTarget(rawText, 'receipt'),
     date: getTodayKey(),
     description,
     amount,
@@ -393,8 +578,31 @@ const buildDraft = (rawText: string, categories: { name: string }[]): DraftExpen
   };
 };
 
+const mergeOcrTexts = (texts: string[]) => {
+  const seen = new Set<string>();
+  return texts
+    .flatMap((text) => text.split(/\r?\n/))
+    .map((line) => line.trim())
+    .filter((line) => {
+      if (!line) return false;
+      const key = normalizeText(line).replace(/\s+/g, ' ');
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .join('\n');
+};
+
 export const BillImportModal: React.FC<BillImportModalProps> = ({ open, onClose }) => {
-  const { addExpense, categories, uiSettings } = useApp();
+  const {
+    addBill,
+    addDebt,
+    addExpense,
+    addIncome,
+    addSavings,
+    categories,
+    uiSettings,
+  } = useApp();
   const { language } = uiSettings;
   const pasteTargetRef = useRef<HTMLDivElement | null>(null);
   const [files, setFiles] = useState<File[]>([]);
@@ -485,17 +693,29 @@ export const BillImportModal: React.FC<BillImportModalProps> = ({ open, onClose 
 
       for (const [index, file] of files.entries()) {
         setStatus(`${t(language, 'billOcrPreparing')} ${index + 1}/${files.length}`);
-        const image = await preprocessImage(file);
-        setStatus(`${t(language, 'billOcrReading')} ${index + 1}/${files.length}`);
-        const result = await Tesseract.recognize(image, 'eng+vie', {
-          logger: (message) => {
-            if (message.status) setStatus(`${message.status} ${index + 1}/${files.length}`);
-            if (Number.isFinite(message.progress)) {
-              setProgress((index + message.progress) / files.length);
-            }
-          },
-        });
-        const text = result.data.text.trim();
+        const images = [
+          { image: file, label: 'original' },
+          { image: await preprocessImage(file), label: 'enhanced' },
+          { image: await cropTopAmountArea(file), label: 'top' },
+        ];
+        const passTexts: string[] = [];
+
+        for (const [passIndex, variant] of images.entries()) {
+          setStatus(`${t(language, 'billOcrReading')} ${index + 1}/${files.length} (${passIndex + 1}/${images.length})`);
+          const result = await Tesseract.recognize(variant.image, 'eng+vie', {
+            logger: (message) => {
+              if (message.status) {
+                setStatus(`${message.status} ${index + 1}/${files.length} (${variant.label})`);
+              }
+              if (Number.isFinite(message.progress)) {
+                setProgress((index + (passIndex + message.progress) / images.length) / files.length);
+              }
+            },
+          });
+          passTexts.push(result.data.text.trim());
+        }
+
+        const text = mergeOcrTexts(passTexts);
         if (text) {
           nextDrafts.push(buildDraft(text, categories));
         }
@@ -514,9 +734,12 @@ export const BillImportModal: React.FC<BillImportModalProps> = ({ open, onClose 
     }
   };
 
-  const handleDraftChange = (index: number, field: keyof Pick<DraftExpense, 'date' | 'description' | 'amount' | 'category'>, value: string) => {
+  const handleDraftChange = (index: number, field: keyof Pick<DraftExpense, 'target' | 'date' | 'description' | 'amount' | 'category'>, value: string) => {
     setDrafts((current) => current.map((draft, draftIndex) => {
       if (draftIndex !== index) return draft;
+      if (field === 'target') {
+        return { ...draft, target: value as ImportTarget };
+      }
       if (field === 'amount') {
         return { ...draft, amount: parseMoney(value) };
       }
@@ -528,11 +751,46 @@ export const BillImportModal: React.FC<BillImportModalProps> = ({ open, onClose 
     const validDrafts = drafts.filter((draft) => draft.amount > 0);
     if (validDrafts.length === 0) return;
     validDrafts.forEach((draft) => {
-      addExpense({
-        date: draft.date,
-        description: draft.description.trim() || 'Imported bill',
+      const description = draft.description.trim() || 'Imported item';
+      if (draft.target === 'expense') {
+        addExpense({
+          date: draft.date,
+          description,
+          amount: draft.amount,
+          category: draft.category,
+        });
+        return;
+      }
+
+      if (draft.target === 'bill') {
+        addBill({
+          date: draft.date,
+          description,
+          amount: draft.amount,
+        });
+        return;
+      }
+
+      if (draft.target === 'debt') {
+        addDebt({
+          date: draft.date,
+          description,
+          amount: draft.amount,
+        });
+        return;
+      }
+
+      if (draft.target === 'income') {
+        addIncome({
+          description,
+          amount: draft.amount,
+        });
+        return;
+      }
+
+      addSavings({
+        description,
         amount: draft.amount,
-        category: draft.category,
       });
     });
     handleClose();
@@ -543,6 +801,17 @@ export const BillImportModal: React.FC<BillImportModalProps> = ({ open, onClose 
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
+
+  const formatTargetLabel = (target: ImportTarget) => {
+    const targetLabels: Record<ImportTarget, string> = {
+      expense: t(language, 'expense'),
+      bill: t(language, 'bills'),
+      income: t(language, 'income'),
+      debt: t(language, 'debt'),
+      savings: t(language, 'savings'),
+    };
+    return targetLabels[target];
+  };
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/45 px-4 py-6">
@@ -630,9 +899,23 @@ export const BillImportModal: React.FC<BillImportModalProps> = ({ open, onClose 
                 <span className="text-xs font-semibold text-ink-500 dark:text-ink-300">{t(language, 'billConfidence')}: {draft.confidence}%</span>
               </div>
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400 mb-2">{t(language, 'date')}</label>
-                <input type="date" value={draft.date} onChange={(e) => handleDraftChange(index, 'date', e.target.value)} className="input" />
+                <label className="block text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400 mb-2">{t(language, 'importTo')}</label>
+                <select value={draft.target} onChange={(e) => handleDraftChange(index, 'target', e.target.value)} className="input">
+                  {importTargets.map((target) => (
+                    <option key={target} value={target}>
+                      {formatTargetLabel(target)}
+                    </option>
+                  ))}
+                </select>
               </div>
+              {(draft.target === 'expense' || draft.target === 'bill' || draft.target === 'debt') && (
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400 mb-2">
+                    {draft.target === 'expense' ? t(language, 'date') : t(language, 'dueDate')}
+                  </label>
+                  <input type="date" value={draft.date} onChange={(e) => handleDraftChange(index, 'date', e.target.value)} className="input" />
+                </div>
+              )}
               <div>
                 <label className="block text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400 mb-2">{t(language, 'amount')}</label>
                 <input
@@ -648,17 +931,19 @@ export const BillImportModal: React.FC<BillImportModalProps> = ({ open, onClose 
                 <label className="block text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400 mb-2">{t(language, 'description')}</label>
                 <input value={draft.description} onChange={(e) => handleDraftChange(index, 'description', e.target.value)} className="input" />
               </div>
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400 mb-2">{t(language, 'category')}</label>
-                <select value={draft.category} onChange={(e) => handleDraftChange(index, 'category', e.target.value)} className="input">
-                  <option value="">{t(language, 'select')}</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.name}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {draft.target === 'expense' && (
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400 mb-2">{t(language, 'category')}</label>
+                  <select value={draft.category} onChange={(e) => handleDraftChange(index, 'category', e.target.value)} className="input">
+                    <option value="">{t(language, 'select')}</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.name}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="sm:col-span-2">
                 <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400">{t(language, 'billRawText')}</label>
                 <textarea className="input min-h-[110px] text-xs" value={draft.rawText} readOnly />

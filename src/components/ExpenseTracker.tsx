@@ -2,12 +2,10 @@ import React, { useState } from 'react';
 import { useApp } from '../AppContext';
 import { ConfirmToast } from './ConfirmToast';
 import { t } from '../i18n';
-import { BillImportModal } from './BillImportModal';
 
 export const ExpenseTracker: React.FC = () => {
   const { expenses, categories, addExpense, removeExpense, updateExpense, expenseRowCount, setExpenseRowCount, uiSettings, readOnly } = useApp();
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [importOpen, setImportOpen] = useState(false);
   const { language } = uiSettings;
   const visibleRows = Math.max(expenseRowCount, expenses.length);
 
@@ -178,14 +176,6 @@ export const ExpenseTracker: React.FC = () => {
         <h2 className="section-title font-heading">{t(language, 'expenseTracker')}</h2>
         <div className="relative flex items-center gap-3">
           <button
-            onClick={() => setImportOpen(true)}
-            className="btn-ghost text-teal-700 hover:text-teal-800 disabled:opacity-50 disabled:pointer-events-none dark:text-teal-300 dark:hover:text-teal-200"
-            title={t(language, 'importBill')}
-            disabled={readOnly}
-          >
-            {t(language, 'importBill')}
-          </button>
-          <button
             onClick={() => setExpenseRowCount(visibleRows + 1)}
             className="btn-ghost group transition-transform duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
             title={t(language, 'addRow')}
@@ -219,7 +209,6 @@ export const ExpenseTracker: React.FC = () => {
           />
         </div>
       </div>
-      <BillImportModal open={importOpen} onClose={() => setImportOpen(false)} />
 
       <div className="table-shell flex-1">
         <table className="w-full table-responsive">

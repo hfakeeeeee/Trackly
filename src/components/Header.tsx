@@ -3,6 +3,7 @@ import { useApp } from '../AppContext';
 import { addDays, format, isAfter, parseISO, startOfDay } from 'date-fns';
 import { t } from '../i18n';
 import { ShareSheetModal } from './ShareSheetModal';
+import { BillImportModal } from './BillImportModal';
 
 export const Header: React.FC = () => {
   const {
@@ -29,6 +30,7 @@ export const Header: React.FC = () => {
   const { language, theme } = uiSettings;
   const [accountOpen, setAccountOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const accountRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -178,6 +180,13 @@ export const Header: React.FC = () => {
                     +
                   </button>
                   <button
+                    onClick={() => setImportOpen(true)}
+                    className="rounded-full bg-teal-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-teal-700"
+                    title={t(language, 'importBill')}
+                  >
+                    {t(language, 'importBill')}
+                  </button>
+                  <button
                     onClick={() => setShareOpen(true)}
                     className="rounded-full bg-ink-900/10 px-2 py-1 text-xs font-semibold text-ink-800 transition hover:bg-ink-900/20 dark:bg-white/15 dark:text-white dark:hover:bg-white/25"
                     title={t(language, 'share')}
@@ -263,7 +272,10 @@ export const Header: React.FC = () => {
         </div>
       </div>
       {!readOnly && (
-        <ShareSheetModal open={shareOpen} onClose={() => setShareOpen(false)} />
+        <>
+          <BillImportModal open={importOpen} onClose={() => setImportOpen(false)} />
+          <ShareSheetModal open={shareOpen} onClose={() => setShareOpen(false)} />
+        </>
       )}
     </header>
   );
