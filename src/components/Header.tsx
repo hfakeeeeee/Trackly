@@ -4,6 +4,7 @@ import { addDays, format, isAfter, parseISO, startOfDay } from 'date-fns';
 import { t } from '../i18n';
 import { ShareSheetModal } from './ShareSheetModal';
 import { BillImportModal } from './BillImportModal';
+import { NewSheetModal } from './NewSheetModal';
 
 export const Header: React.FC = () => {
   const {
@@ -20,7 +21,6 @@ export const Header: React.FC = () => {
     sheets,
     currentSheetId,
     setCurrentSheet,
-    addSheet,
     renameSheet,
     removeSheet,
     user,
@@ -31,6 +31,7 @@ export const Header: React.FC = () => {
   const [accountOpen, setAccountOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [newSheetOpen, setNewSheetOpen] = useState(false);
   const accountRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -166,14 +167,7 @@ export const Header: React.FC = () => {
                     </svg>
                   </button>
                   <button
-                    onClick={() => {
-                      const name = window.prompt(t(language, 'newSheetName'));
-                      if (name && name.trim()) {
-                        addSheet(name.trim());
-                      } else if (name === '') {
-                        addSheet();
-                      }
-                    }}
+                    onClick={() => setNewSheetOpen(true)}
                     className="rounded-full bg-ink-900/10 px-2 py-1 text-xs font-semibold text-ink-800 transition hover:bg-ink-900/20 dark:bg-white/15 dark:text-white dark:hover:bg-white/25"
                     title={t(language, 'addSheet')}
                   >
@@ -275,6 +269,7 @@ export const Header: React.FC = () => {
         <>
           <BillImportModal open={importOpen} onClose={() => setImportOpen(false)} />
           <ShareSheetModal open={shareOpen} onClose={() => setShareOpen(false)} />
+          <NewSheetModal open={newSheetOpen} onClose={() => setNewSheetOpen(false)} />
         </>
       )}
     </header>

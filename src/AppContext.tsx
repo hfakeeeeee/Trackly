@@ -8,7 +8,7 @@ import { auth, db } from './firebase';
 interface AppContextType extends AppState, Sheet {
   currentSheet: Sheet;
   setCurrentSheet: (id: string) => void;
-  addSheet: (name?: string) => void;
+  addSheet: (name?: string, categorySourceSheetId?: string) => void;
   renameSheet: (id: string, name: string) => void;
   removeSheet: (id: string) => void;
   setExpenseRowCount: (count: number) => void;
@@ -347,15 +347,29 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }));
   };
 
-  const addSheet = (name?: string) => {
+  const addSheet = (name?: string, categorySourceSheetId?: string) => {
     if (readOnly) return;
-    const sheetName = name?.trim() || `Sheet ${state.sheets.length + 1}`;
-    const newSheet = createDefaultSheet(sheetName);
-    setState(prev => ({
-      ...prev,
-      sheets: [...prev.sheets, newSheet],
-      currentSheetId: newSheet.id,
-    }));
+    setState(prev => {
+      const sheetName = name?.trim() || `Sheet ${prev.sheets.length + 1}`;
+      const newSheet = createDefaultSheet(sheetName);
+      const categorySource = categorySourceSheetId
+        ? prev.sheets.find(sheet => sheet.id === categorySourceSheetId)
+        : undefined;
+
+      if (categorySource) {
+        newSheet.categories = categorySource.categories.map(category => ({
+          ...category,
+          id: generateId(),
+          total: 0,
+        }));
+      }
+
+      return {
+        ...prev,
+        sheets: [...prev.sheets, newSheet],
+        currentSheetId: newSheet.id,
+      };
+    });
   };
 
   const renameSheet = (id: string, name: string) => {
