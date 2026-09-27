@@ -5,6 +5,7 @@ import { t } from '../i18n';
 import { ShareSheetModal } from './ShareSheetModal';
 import { BillImportModal } from './BillImportModal';
 import { NewSheetModal } from './NewSheetModal';
+import { SheetPickerModal } from './SheetPickerModal';
 
 export const Header: React.FC = () => {
   const {
@@ -20,18 +21,19 @@ export const Header: React.FC = () => {
     setLanguage,
     sheets,
     currentSheetId,
-    setCurrentSheet,
     renameSheet,
     removeSheet,
     user,
     signOut,
     readOnly,
+    saveStatus,
   } = useApp();
   const { language, theme } = uiSettings;
   const [accountOpen, setAccountOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [newSheetOpen, setNewSheetOpen] = useState(false);
+  const [sheetPickerOpen, setSheetPickerOpen] = useState(false);
   const accountRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -81,6 +83,7 @@ export const Header: React.FC = () => {
   };
 
   const currentMonth = getDominantMonthLabel(periodSettings.startDate, periodSettings.endDate);
+  const currentSheetName = sheets.find(sheet => sheet.id === currentSheetId)?.name ?? t(language, 'sheets');
   const totalIncome = getTotalIncome();
   const totalSavings = getTotalSavings();
   const totalExpenses = getTotalExpenses();
@@ -117,6 +120,23 @@ export const Header: React.FC = () => {
           </div>
           <div className="flex flex-wrap items-center gap-3 text-sm text-ink-600 dark:text-white/70">
             <span>{t(language, 'tagline')}</span>
+            {!readOnly && user && saveStatus !== 'idle' && (
+              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                saveStatus === 'error'
+                  ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-200'
+                  : saveStatus === 'local'
+                    ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-200'
+                    : 'bg-teal-100 text-teal-700 dark:bg-teal-500/15 dark:text-teal-200'
+              }`}>
+                {t(language, saveStatus === 'saving'
+                  ? 'savingData'
+                  : saveStatus === 'saved'
+                    ? 'dataSaved'
+                    : saveStatus === 'local'
+                      ? 'savedLocally'
+                      : 'saveFailed')}
+              </span>
+            )}
             <div className="flex items-center gap-2 rounded-full border border-ink-900/10 bg-white/70 px-2 py-1 dark:border-white/20 dark:bg-ink-900/60">
               <span className="text-xs uppercase tracking-wide text-ink-500 dark:text-white/60">{t(language, 'sheets')}</span>
               {readOnly ? (
@@ -125,17 +145,17 @@ export const Header: React.FC = () => {
                 </span>
               ) : (
                 <>
-                  <select
-                    value={currentSheetId}
-                    onChange={(e) => setCurrentSheet(e.target.value)}
-                    className="rounded-full bg-transparent px-2 py-1 text-xs font-semibold text-ink-800 focus:outline-none dark:text-white/90"
+                  <button
+                    type="button"
+                    onClick={() => setSheetPickerOpen(true)}
+                    className="inline-flex max-w-40 items-center gap-1 rounded-full bg-transparent px-2 py-1 text-xs font-semibold text-ink-800 transition hover:bg-ink-900/10 dark:text-white/90 dark:hover:bg-white/10"
+                    title={t(language, 'selectSheet')}
                   >
-                    {sheets.map((sheet) => (
-                      <option key={sheet.id} value={sheet.id}>
-                        {sheet.name}
-                      </option>
-                    ))}
-                  </select>
+                    <span className="truncate">{currentSheetName}</span>
+                    <svg className="h-3 w-3 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.51a.75.75 0 01-1.08 0l-4.25-4.51a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+                    </svg>
+                  </button>
                   <button
                     onClick={() => {
                       const current = sheets.find(sheet => sheet.id === currentSheetId);
@@ -210,7 +230,7 @@ export const Header: React.FC = () => {
                 {language === 'en' ? 'EN' : 'VI'}
               </button>
             </div>
-            <div className="relative" ref={accountRef}>
+            {user && <div className="relative" ref={accountRef}>
               <button
                 onClick={() => setAccountOpen((prev) => !prev)}
                 className="inline-flex items-center gap-1 rounded-full border border-ink-900/10 bg-white/70 px-2 py-1 text-xs font-semibold text-ink-800 transition hover:bg-ink-900/20 dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
@@ -241,7 +261,7 @@ export const Header: React.FC = () => {
                   {t(language, 'signOut')}
                 </button>
               </div>
-            </div>
+            </div>}
           </div>
         </div>
         <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -270,6 +290,7 @@ export const Header: React.FC = () => {
           <BillImportModal open={importOpen} onClose={() => setImportOpen(false)} />
           <ShareSheetModal open={shareOpen} onClose={() => setShareOpen(false)} />
           <NewSheetModal open={newSheetOpen} onClose={() => setNewSheetOpen(false)} />
+          <SheetPickerModal open={sheetPickerOpen} onClose={() => setSheetPickerOpen(false)} />
         </>
       )}
     </header>

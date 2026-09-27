@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useApp } from '../AppContext';
 import { differenceInDays, format } from 'date-fns';
 import { t } from '../i18n';
+import { getAllowances } from '../domain';
 
 export const Overview: React.FC = () => {
   const {
@@ -31,27 +32,23 @@ export const Overview: React.FC = () => {
   const daysRemaining = Math.max(0, differenceInDays(endDate, today) + 1);
   const remainingAmount = getRemainingAmount();
   const safeRemainingAmount = Number.isFinite(remainingAmount) ? remainingAmount : 0;
-  const computedDailyAllowance = daysRemaining > 0 ? safeRemainingAmount / daysRemaining : 0;
-  const roundedComputedDaily = Math.round(computedDailyAllowance);
   const snapshotAmount =
     currentSheet.allowanceSnapshot?.date === todayKey
       ? toNumber(currentSheet.allowanceSnapshot.amount)
       : undefined;
-  const snapshotRounded = snapshotAmount !== undefined ? Math.round(snapshotAmount) : undefined;
-  const dailyAllowance =
-    snapshotRounded !== undefined && snapshotRounded !== 0
-      ? snapshotRounded
-      : roundedComputedDaily;
-  const nextDayAllowance =
-    daysRemaining > 1 ? safeRemainingAmount / (daysRemaining - 1) : 0;
+  const {
+    daily: dailyAllowance,
+    nextDay: nextDayAllowance,
+    roundedComputedDaily,
+  } = getAllowances(safeRemainingAmount, daysRemaining, snapshotAmount);
+  const totalMagnitude =
+    currentSheet.income.reduce((sum, item) => sum + Math.abs(toNumber(item.amount)), 0) +
+    currentSheet.debts.reduce((sum, item) => sum + Math.abs(toNumber(item.amount)), 0) +
+    currentSheet.savings.reduce((sum, item) => sum + Math.abs(toNumber(item.amount)), 0) +
+    currentSheet.bills.reduce((sum, item) => sum + Math.abs(toNumber(item.amount)), 0) +
+    currentSheet.expenses.reduce((sum, item) => sum + Math.abs(toNumber(item.amount)), 0);
 
   useEffect(() => {
-    const totalMagnitude =
-      currentSheet.income.reduce((sum, item) => sum + Math.abs(toNumber(item.amount)), 0) +
-      currentSheet.debts.reduce((sum, item) => sum + Math.abs(toNumber(item.amount)), 0) +
-      currentSheet.savings.reduce((sum, item) => sum + Math.abs(toNumber(item.amount)), 0) +
-      currentSheet.bills.reduce((sum, item) => sum + Math.abs(toNumber(item.amount)), 0) +
-      currentSheet.expenses.reduce((sum, item) => sum + Math.abs(toNumber(item.amount)), 0);
     const hasMeaningfulData = totalMagnitude > 0;
     const snapshotIsToday = currentSheet.allowanceSnapshot?.date === todayKey;
     const snapshotValue = snapshotIsToday ? toNumber(currentSheet.allowanceSnapshot?.amount) : undefined;
@@ -68,13 +65,9 @@ export const Overview: React.FC = () => {
     roundedComputedDaily,
     currentSheet.allowanceSnapshot?.date,
     currentSheet.allowanceSnapshot?.amount,
-    currentSheet.bills.length,
-    currentSheet.debts.length,
-    currentSheet.expenses.length,
-    currentSheet.income.length,
-    currentSheet.savings.length,
     setDailyAllowanceSnapshot,
     todayKey,
+    totalMagnitude,
   ]);
 
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {

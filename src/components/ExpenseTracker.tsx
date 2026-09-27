@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../AppContext';
 import { ConfirmToast } from './ConfirmToast';
 import { t } from '../i18n';
+import { TableAddRowButton } from './TableAddRowButton';
 
 export const ExpenseTracker: React.FC = () => {
   const { expenses, categories, addExpense, removeExpense, updateExpense, expenseRowCount, setExpenseRowCount, uiSettings, readOnly } = useApp();
@@ -89,11 +90,23 @@ export const ExpenseTracker: React.FC = () => {
     setExpenseRowCount(visibleRows - 1);
   };
 
+  const handleAddRow = () => {
+    const newRowIndex = visibleRows;
+    setExpenseRowCount(visibleRows + 1);
+    window.setTimeout(() => {
+      const firstInput = document.querySelector<HTMLInputElement>(
+        `[data-expense-row="${newRowIndex}"] input`
+      );
+      firstInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      firstInput?.focus({ preventScroll: true });
+    }, 0);
+  };
+
   const renderRow = (index: number) => {
     const item = expenses[index];
     
     return (
-      <tr key={index} className="table-row">
+      <tr key={index} className="table-row" data-expense-row={index}>
         <td className="py-2 px-3 border-r border-ink-100/70" data-label={t(language, 'date')}>
           <input
             type="date"
@@ -176,7 +189,7 @@ export const ExpenseTracker: React.FC = () => {
         <h2 className="section-title font-heading">{t(language, 'expenseTracker')}</h2>
         <div className="relative flex items-center gap-3">
           <button
-            onClick={() => setExpenseRowCount(visibleRows + 1)}
+            onClick={handleAddRow}
             className="btn-ghost group transition-transform duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
             title={t(language, 'addRow')}
             disabled={readOnly}
@@ -226,6 +239,9 @@ export const ExpenseTracker: React.FC = () => {
           </tbody>
         </table>
       </div>
+      {!readOnly && (
+        <TableAddRowButton label={t(language, 'addRow')} onClick={handleAddRow} />
+      )}
     </section>
   );
 };

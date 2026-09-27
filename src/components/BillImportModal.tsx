@@ -172,8 +172,7 @@ const loadImage = async (file: Blob) => {
 
 const preprocessImage = async (file: File) => {
   const image = await loadImage(file);
-  try {
-    const maxSide = Math.max(image.naturalWidth, image.naturalHeight);
+  const maxSide = Math.max(image.naturalWidth, image.naturalHeight);
     const scale = Math.min(3, Math.max(1.5, 2400 / maxSide));
     const canvas = document.createElement('canvas');
     canvas.width = Math.round(image.naturalWidth * scale);
@@ -209,11 +208,9 @@ const preprocessImage = async (file: File) => {
 
     context.putImageData(imageData, 0, 0);
 
-    return await new Promise<Blob>((resolve) => {
-      canvas.toBlob((blob) => resolve(blob ?? file), 'image/png');
-    });
-  } finally {
-  }
+  return await new Promise<Blob>((resolve) => {
+    canvas.toBlob((blob) => resolve(blob ?? file), 'image/png');
+  });
 };
 
 const cropTopAmountArea = async (file: File) => {
@@ -461,7 +458,7 @@ const buildUtilityBillDraft = (rawText: string, categories: { name: string }[]):
 
 const cleanBankDescriptionValue = (line: string) => {
   return line
-    .replace(/^(nguoi nhan|den|toi|recipient|beneficiary|noi dung|content|description)\s*[:\-]?\s*/i, '')
+    .replace(/^(nguoi nhan|den|toi|recipient|beneficiary|noi dung|content|description)\s*[:-]?\s*/i, '')
     .replace(/\s+/g, ' ')
     .trim();
 };

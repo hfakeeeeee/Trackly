@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../AppContext';
 import { ConfirmToast } from './ConfirmToast';
 import { t } from '../i18n';
+import { TableAddRowButton } from './TableAddRowButton';
 
 export const Debt: React.FC = () => {
   const { debts, addDebt, removeDebt, updateDebt, uiSettings, readOnly } = useApp();
@@ -82,11 +83,21 @@ export const Debt: React.FC = () => {
     setMaxRows((prev) => (prev > 1 ? prev - 1 : prev));
   };
 
+  const handleAddRow = () => {
+    const newRowIndex = visibleRows;
+    setMaxRows(visibleRows + 1);
+    window.setTimeout(() => {
+      const input = document.querySelector<HTMLInputElement>(`[data-debt-row="${newRowIndex}"] input`);
+      input?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      input?.focus({ preventScroll: true });
+    }, 0);
+  };
+
   const renderRow = (index: number) => {
     const item = debts[index];
     
     return (
-      <tr key={index} className="table-row">
+      <tr key={index} className="table-row" data-debt-row={index}>
         <td className="py-2 px-3 border-r border-ink-100/70" data-label={t(language, 'description')}>
           <input
             type="text"
@@ -154,7 +165,7 @@ export const Debt: React.FC = () => {
         <h2 className="section-title font-heading">{t(language, 'debt')}</h2>
         <div className="relative flex items-center gap-3">
           <button
-            onClick={() => setMaxRows(maxRows + 1)}
+            onClick={handleAddRow}
             className="btn-ghost group transition-transform duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
             title={t(language, 'addRow')}
             disabled={readOnly}
@@ -203,6 +214,7 @@ export const Debt: React.FC = () => {
           </tbody>
         </table>
       </div>
+      {!readOnly && <TableAddRowButton label={t(language, 'addRow')} onClick={handleAddRow} />}
     </section>
   );
 };

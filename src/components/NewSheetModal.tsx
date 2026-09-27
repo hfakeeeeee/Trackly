@@ -36,7 +36,7 @@ export const NewSheetModal: React.FC<NewSheetModalProps> = ({ open, onClose }) =
   const filteredSources = useMemo(() => {
     const query = sourceSearch.trim().toLocaleLowerCase();
     return [...sheets]
-      .reverse()
+      .sort((a, b) => b.periodSettings.startDate.localeCompare(a.periodSettings.startDate))
       .filter(sheet => !query || sheet.name.toLocaleLowerCase().includes(query));
   }, [sheets, sourceSearch]);
 

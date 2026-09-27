@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { AppProvider } from './AppContext';
 import { Header } from './components/Header';
 import { Overview } from './components/Overview';
@@ -17,7 +18,11 @@ import { useApp } from './AppContext';
 import { AuthScreen } from './components/AuthScreen';
 
 function AppContent() {
-  const { themeTransitionId, user, authLoading, dataLoading, shareLoading, shareError } = useApp();
+  const { themeTransitionId, user, authLoading, dataLoading, dataError, shareLoading, shareError, readOnly } = useApp();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [readOnly, user?.uid]);
 
   if (authLoading || shareLoading || (user && dataLoading)) {
     return (
@@ -99,7 +104,21 @@ function AppContent() {
     );
   }
 
-  if (!user) {
+  if (dataError) {
+    return (
+      <div className="min-h-screen bg-sand-50 px-4 text-ink-900 flex items-center justify-center dark:bg-ink-900 dark:text-ink-100">
+        <div className="card card-pad max-w-md text-center">
+          <h1 className="section-title font-heading mb-2">Unable to load data</h1>
+          <p className="mb-4 text-sm text-ink-600 dark:text-ink-300">{dataError}</p>
+          <button className="btn-primary" onClick={() => window.location.reload()}>
+            Try again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user && !readOnly) {
     return <AuthScreen />;
   }
 

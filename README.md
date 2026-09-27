@@ -16,6 +16,7 @@ Modern personal expense tracker built with React, TypeScript, and Vite.
 - Auth: email/password login, register, forgot password
 - Email verification and password reset via Firebase
 - Cloud sync per user (Firestore)
+- Offline cache with automatic retry and visible save status
 - Read-only sharing (public link, signed-in link, or invite-only)
 - Light/dark theme toggle, language toggle, responsive layout
 - Polished loading and auth screens with animations
@@ -63,7 +64,14 @@ VITE_FIREBASE_APP_ID=...
 
 ### Firestore Rules
 
-Use this rule set to restrict access to each user:
+Deploy the checked-in `firestore.rules` file. It protects each user document and
+its per-sheet subcollection while allowing the configured read-only share links.
+
+```bash
+firebase deploy --only firestore:rules
+```
+
+Equivalent rules:
 
 ### Sharing Rules (Required for share links)
 
@@ -75,6 +83,10 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      match /sheets/{sheetId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
 
     match /shares/{shareId} {
@@ -88,19 +100,6 @@ service cloud.firestore {
 
       allow update, delete: if request.auth != null
         && request.auth.uid == resource.data.ownerUid;
-    }
-  }
-}
-```
-
-If you later store data in subcollections:
-
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
   }
 }
@@ -136,6 +135,17 @@ npm run build
 - **Invite-only**: only listed emails can view.
 
 Sharing is read-only. Edits are disabled for viewers.
+
+## Data Storage
+
+Trackly stores user preferences in `users/{uid}` and each budget sheet in
+`users/{uid}/sheets/{sheetId}`. Existing single-document accounts are migrated
+automatically after the subcollection security rules are deployed. If the new
+rules are not available yet, the app keeps using the legacy document format.
+
+On supported browsers, Firestore data is cached in IndexedDB and pending edits
+are synchronized when connectivity returns. A per-user local backup prevents a
+temporary read failure from replacing the workspace with blank default data.
 
 ## Deployment (GitHub Pages)
 

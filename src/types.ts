@@ -32,6 +32,7 @@ export interface ExpenseItem {
   amount: number;
   description: string;
   category: string;
+  categoryId?: string;
 }
 
 export interface Category {
