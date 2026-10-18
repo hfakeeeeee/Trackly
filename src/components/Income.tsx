@@ -140,7 +140,7 @@ export const Income: React.FC = () => {
   };
 
   return (
-    <section className="card card-pad mb-6">
+    <section className="card card-pad">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <h2 className="section-title font-heading">{t(language, 'income')}</h2>
         <div className="relative flex items-center gap-3">

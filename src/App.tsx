@@ -141,7 +141,7 @@ function AppContent() {
 
           {/* Row 2: Income/Debt/Savings (40%) + Bills (60%) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6 animate-rise-in anim-delay-200">
-            <div className="lg:col-span-5 flex flex-col gap-6">
+            <div className="lg:col-span-5 flex h-full flex-col gap-6">
               <Income />
               <Debt />
               <Savings />

@@ -160,7 +160,7 @@ export const Bills: React.FC = () => {
   };
 
   return (
-    <section className="card card-pad mb-6 flex flex-col">
+    <section className="card card-pad flex flex-col">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <h2 className="section-title font-heading">{t(language, 'bills')}</h2>
         <div className="relative flex items-center gap-3">

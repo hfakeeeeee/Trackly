@@ -55,7 +55,7 @@ export const DailyExpenseChart: React.FC = () => {
   };
 
   return (
-    <section className="card card-pad">
+    <section className="card card-pad flex flex-1 flex-col">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h2 className="section-title font-heading">{t(language, 'dailyExpenseChart')}</h2>
@@ -66,7 +66,7 @@ export const DailyExpenseChart: React.FC = () => {
       </div>
 
       {chartData.length === 0 ? (
-        <div className="flex h-72 items-center justify-center text-ink-500 dark:text-ink-400">
+        <div className="flex min-h-72 flex-1 items-center justify-center text-ink-500 dark:text-ink-400">
           <div className="text-center">
             <svg
               className="mx-auto mb-3 h-12 w-12 text-ink-400 dark:text-ink-500"
@@ -88,7 +88,7 @@ export const DailyExpenseChart: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="h-80">
+        <div className="min-h-80 flex-1">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
               data={chartData}

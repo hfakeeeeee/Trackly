@@ -142,7 +142,7 @@ export const Savings: React.FC = () => {
   };
 
   return (
-    <section className="card card-pad mb-6">
+    <section className="card card-pad flex flex-1 flex-col">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <h2 className="section-title font-heading">{t(language, 'savings')}</h2>
         <div className="relative flex items-center gap-3">
@@ -183,8 +183,8 @@ export const Savings: React.FC = () => {
       </div>
       {showHistory && <SavingsHistoryChart onClose={() => setShowHistory(false)} />}
 
-      <div className="table-shell">
-        <table className="w-full table-responsive">
+      <div className="table-shell flex-1">
+        <table className="h-full w-full table-responsive">
           <thead className="table-head">
             <tr className="border-b border-ink-100/80">
               <th className="text-left py-3 px-3 text-xs font-semibold uppercase tracking-wide text-ink-500 border-r border-ink-100/70">{t(language, 'description')}</th>
