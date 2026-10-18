@@ -3,11 +3,13 @@ import { useApp } from '../AppContext';
 import { ConfirmToast } from './ConfirmToast';
 import { t } from '../i18n';
 import { TableAddRowButton } from './TableAddRowButton';
+import { SavingsHistoryChart } from './SavingsHistoryChart';
 
 export const Savings: React.FC = () => {
   const { savings, addSavings, removeSavings, updateSavings, getTotalSavings, uiSettings, readOnly } = useApp();
   const [maxRows, setMaxRows] = useState(4);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const { language } = uiSettings;
   const visibleRows = Math.max(maxRows, savings.length);
 
@@ -144,6 +146,7 @@ export const Savings: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <h2 className="section-title font-heading">{t(language, 'savings')}</h2>
         <div className="relative flex items-center gap-3">
+          <button onClick={() => setShowHistory(true)} className="btn-ghost">{language === 'vi' ? 'Lịch sử' : 'History'}</button>
           <button
             onClick={handleAddRow}
             className="btn-ghost group transition-transform duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
@@ -178,6 +181,7 @@ export const Savings: React.FC = () => {
           />
         </div>
       </div>
+      {showHistory && <SavingsHistoryChart onClose={() => setShowHistory(false)} />}
 
       <div className="table-shell">
         <table className="w-full table-responsive">

@@ -88,7 +88,7 @@ export const Overview: React.FC = () => {
   return (
     <section className="card card-pad mb-6 h-full flex flex-col">
       <h2 className="section-title font-heading mb-4">{t(language, 'overview')}</h2>
-      <div className="space-y-4 flex-1 flex flex-col justify-center">
+      <div className="flex flex-1 flex-col justify-between gap-6">
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wide text-ink-500 dark:text-ink-400 mb-2">{t(language, 'startDate')}</label>
           <input

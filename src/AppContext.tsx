@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef, ReactNod
 import { User, createUserWithEmailAndPassword, onAuthStateChanged, sendEmailVerification, sendPasswordResetEmail, signInWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth';
 import { collection, deleteDoc, doc, getDoc, getDocs, setDoc, writeBatch } from 'firebase/firestore';
 import { FirebaseError } from 'firebase/app';
-import { AppState, IncomeItem, DebtItem, SavingsItem, BillItem, ExpenseItem, Sheet, AllowanceSnapshot, ShareSettings, ShareVisibility } from './types';
+import { AppState, IncomeItem, DebtItem, DebtGoal, SavingsItem, BillItem, ExpenseItem, Sheet, AllowanceSnapshot, ShareSettings, ShareVisibility } from './types';
 import { auth, db } from './firebase';
 import { cloneCategoriesForNewSheet, getSheetTotals, reconcileCategories, toNumber } from './domain';
 
@@ -17,6 +17,9 @@ interface AppContextType extends AppState, Sheet {
   removeIncome: (id: string) => void;
   updateIncome: (id: string, item: Partial<Omit<IncomeItem, 'id'>>) => void;
   addDebt: (item: Omit<DebtItem, 'id'>) => void;
+  addDebtGoal: (goal: Omit<DebtGoal, 'id'>) => void;
+  updateDebtGoal: (id: string, goal: Partial<Omit<DebtGoal, 'id'>>) => void;
+  removeDebtGoal: (id: string) => void;
   removeDebt: (id: string) => void;
   updateDebt: (id: string, item: Partial<Omit<DebtItem, 'id'>>) => void;
   addSavings: (item: Omit<SavingsItem, 'id'>) => void;
@@ -95,6 +98,7 @@ const createDefaultState = (): AppState => {
   return {
     sheets: [defaultSheet],
     currentSheetId: defaultSheet.id,
+    debtGoals: [],
     uiSettings: {
       theme: 'light',
       language: 'en',
@@ -110,7 +114,12 @@ const normalizeSheet = (sheet: Sheet): Sheet => reconcileCategories({
     sheet.expenses.length
   ),
   income: sheet.income.map(item => ({ ...item, amount: toNumber(item.amount) })),
-  debts: sheet.debts.map(item => ({ ...item, amount: toNumber(item.amount) })),
+  debts: sheet.debts.map(item => ({
+    ...item,
+    amount: toNumber(item.amount),
+    ...(item.goal !== undefined ? { goal: toNumber(item.goal) } : {}),
+    ...(item.paid !== undefined ? { paid: toNumber(item.paid) } : {}),
+  })),
   savings: sheet.savings.map(item => ({ ...item, amount: toNumber(item.amount) })),
   bills: sheet.bills.map(item => ({ ...item, amount: toNumber(item.amount) })),
   expenses: sheet.expenses.map(item => ({ ...item, amount: toNumber(item.amount) })),
@@ -128,6 +137,7 @@ const buildStateFromData = (parsed?: Partial<AppState> & Partial<Sheet>): AppSta
       ...parsed,
       sheets: parsed.sheets.map(sheet => normalizeSheet(sheet)),
       currentSheetId: parsed.currentSheetId ?? parsed.sheets[0].id,
+      debtGoals: (parsed.debtGoals ?? []).map(goal => ({ ...goal, amount: toNumber(goal.amount) })),
       uiSettings: {
         ...baseState.uiSettings,
         ...(parsed.uiSettings ?? {}),
@@ -162,6 +172,7 @@ const buildStateFromData = (parsed?: Partial<AppState> & Partial<Sheet>): AppSta
     ...baseState,
     sheets: [normalizeSheet(legacySheet)],
     currentSheetId: legacySheet.id,
+    debtGoals: (parsed.debtGoals ?? []).map(goal => ({ ...goal, amount: toNumber(goal.amount) })),
     uiSettings: {
       ...baseState.uiSettings,
       ...(parsed.uiSettings ?? {}),
@@ -407,6 +418,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         batch.set(doc(db, 'users', user.uid), sanitizeState({
           schemaVersion: 2,
           currentSheetId: state.currentSheetId,
+          debtGoals: state.debtGoals,
           uiSettings: state.uiSettings,
           updatedAt: Date.now(),
         }));
@@ -592,6 +604,32 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           ? { ...sheet, debts: [...sheet.debts, { ...item, id: generateId() }] }
           : sheet
       ),
+    }));
+  };
+
+  const addDebtGoal = (goal: Omit<DebtGoal, 'id'>) => {
+    if (readOnly || !goal.name.trim() || goal.amount <= 0) return;
+    setState(prev => ({ ...prev, debtGoals: [...prev.debtGoals, { ...goal, name: goal.name.trim(), id: generateId() }] }));
+  };
+
+  const updateDebtGoal = (id: string, goal: Partial<Omit<DebtGoal, 'id'>>) => {
+    if (readOnly) return;
+    setState(prev => ({
+      ...prev,
+      debtGoals: prev.debtGoals.map(item => item.id === id ? {
+        ...item,
+        ...(goal.name !== undefined ? { name: goal.name.trim() || item.name } : {}),
+        ...(goal.amount !== undefined && goal.amount > 0 ? { amount: goal.amount } : {}),
+      } : item),
+    }));
+  };
+
+  const removeDebtGoal = (id: string) => {
+    if (readOnly) return;
+    setState(prev => ({
+      ...prev,
+      debtGoals: prev.debtGoals.filter(goal => goal.id !== id),
+      sheets: prev.sheets.map(sheet => ({ ...sheet, debts: sheet.debts.map(debt => debt.goalId === id ? { ...debt, goalId: undefined } : debt) })),
     }));
   };
 
@@ -968,6 +1006,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         removeIncome,
         updateIncome,
         addDebt,
+        addDebtGoal,
+        updateDebtGoal,
+        removeDebtGoal,
         removeDebt,
         updateDebt,
         addSavings,

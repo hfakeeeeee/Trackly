@@ -64,8 +64,8 @@ export const FinancialOverviewChart: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div>
-          <div className="h-64">
+        <div className="flex flex-1 flex-col">
+          <div className="h-[min(34vh,310px)] min-h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -74,7 +74,7 @@ export const FinancialOverviewChart: React.FC = () => {
                   cy="50%"
                   labelLine={false}
                   label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
-                  outerRadius={80}
+                  outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
                 >
@@ -89,7 +89,7 @@ export const FinancialOverviewChart: React.FC = () => {
           </div>
           
           {/* Summary Cards */}
-          <div className="grid grid-cols-2 gap-2 mt-3">
+          <div className="mt-auto grid grid-cols-2 gap-3 pt-5">
             {totalDebt > 0 && (
               <div className="rounded-xl border border-rose-200/60 bg-rose-50/70 p-2 dark:border-rose-500/30 dark:bg-rose-500/10">
                 <p className="text-xs text-ink-500 dark:text-ink-300">{t(language, 'debt')}</p>

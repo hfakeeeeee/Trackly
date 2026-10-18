@@ -11,6 +11,15 @@ export interface DebtItem {
   description: string;
   amount: number;
   date: string;
+  goal?: number;
+  paid?: number;
+  goalId?: string;
+}
+
+export interface DebtGoal {
+  id: string;
+  name: string;
+  amount: number;
 }
 
 export interface SavingsItem {
@@ -63,6 +72,7 @@ export interface AllowanceSnapshot {
 export interface AppState {
   sheets: Sheet[];
   currentSheetId: string;
+  debtGoals: DebtGoal[];
   uiSettings: {
     theme: 'light' | 'dark';
     language: 'en' | 'vi';
