@@ -8,8 +8,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Manrope', 'system-ui', 'sans-serif'],
-        heading: ['Sora', 'Manrope', 'system-ui', 'sans-serif'],
+        sans: ['Quicksand', 'system-ui', 'sans-serif'],
+        heading: ['Quicksand', 'system-ui', 'sans-serif'],
       },
       colors: {
         ink: {

@@ -1,13 +1,12 @@
 import React from 'react';
 import {
   Bar,
-  CartesianGrid,
   ComposedChart,
-  Line,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
+  LabelList,
 } from 'recharts';
 import { useApp } from '../AppContext';
 import { t } from '../i18n';
@@ -45,7 +44,7 @@ export const DailyExpenseChart: React.FC = () => {
     if (!active || !payload || !payload.length) return null;
 
     return (
-      <div className="rounded-xl border border-ink-100/70 bg-white/90 px-4 py-2 text-sm shadow-soft dark:border-ink-800/70 dark:bg-ink-900/80">
+      <div className="chart-tooltip">
         <p className="font-semibold text-ink-900 dark:text-ink-100">{label}</p>
         <p className="font-semibold text-sky-700 dark:text-sky-300">
           {formatCurrency(payload[0].value)}
@@ -55,7 +54,7 @@ export const DailyExpenseChart: React.FC = () => {
   };
 
   return (
-    <section className="card card-pad flex flex-1 flex-col">
+    <section className="card card-pad chart-card daily-spending-card flex flex-col">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h2 className="section-title font-heading">{t(language, 'dailyExpenseChart')}</h2>
@@ -66,7 +65,7 @@ export const DailyExpenseChart: React.FC = () => {
       </div>
 
       {chartData.length === 0 ? (
-        <div className="flex min-h-72 flex-1 items-center justify-center text-ink-500 dark:text-ink-400">
+        <div className="flex min-h-40 items-center justify-center text-ink-500 dark:text-ink-400">
           <div className="text-center">
             <svg
               className="mx-auto mb-3 h-12 w-12 text-ink-400 dark:text-ink-500"
@@ -88,45 +87,24 @@ export const DailyExpenseChart: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="min-h-80 flex-1">
+        <div className="daily-spending-plot">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
               data={chartData}
-              margin={{ top: 8, right: 12, left: 0, bottom: 8 }}
+              margin={{ top: 24, right: 8, left: 8, bottom: 0 }}
               barCategoryGap="28%"
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.25)" />
-              <XAxis
-                dataKey="date"
-                tickFormatter={formatShortDate}
-                stroke="#64748b"
-                tick={{ fontSize: 12 }}
-              />
-              <YAxis
-                stroke="#64748b"
-                tick={{ fontSize: 12 }}
-                tickFormatter={(value) => formatCurrency(Number(value))}
-              />
+              <YAxis hide domain={[0, (maximum: number) => maximum * 1.18]} />
+              <XAxis dataKey="date" tickFormatter={formatShortDate} axisLine={false} tickLine={false}
+                tick={{ fill: 'var(--chart-text)', fontSize: 11 }} minTickGap={24} dy={8} />
               <Tooltip
-                cursor={{ fill: 'rgba(14, 165, 233, 0.08)' }}
+                cursor={{ fill: 'var(--chart-track)', radius: 6 }}
                 content={<CustomTooltip />}
                 labelFormatter={(value) => String(value)}
               />
-              <Line
-                type="monotone"
-                dataKey="total"
-                stroke="#0369a1"
-                strokeWidth={2.5}
-                dot={{ r: 3, fill: '#0369a1', strokeWidth: 0 }}
-                activeDot={{ r: 5, fill: '#0369a1', stroke: '#e0f2fe', strokeWidth: 2 }}
-              />
-              <Bar
-                dataKey="total"
-                radius={[10, 10, 0, 0]}
-                fill="#0ea5e9"
-                barSize={22}
-                maxBarSize={22}
-              />
+              <Bar dataKey="total" radius={[8, 8, 2, 2]} fill="var(--chart-1)" maxBarSize={44} isAnimationActive={false}>
+                {chartData.length <= 10 && <LabelList dataKey="total" position="top" formatter={(value: number) => new Intl.NumberFormat(language === 'vi' ? 'vi-VN' : 'en', { notation: 'compact', maximumFractionDigits: 1 }).format(value)} fill="var(--chart-text)" fontSize={11} />}
+              </Bar>
             </ComposedChart>
           </ResponsiveContainer>
         </div>

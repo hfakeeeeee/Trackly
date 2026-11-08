@@ -184,7 +184,7 @@ export const ExpenseTracker: React.FC = () => {
   };
 
   return (
-    <section className="card card-pad mb-6 h-full flex flex-col">
+    <section className="card card-pad flex flex-col">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <h2 className="section-title font-heading">{t(language, 'expenseTracker')}</h2>
         <div className="relative flex items-center gap-3">
@@ -223,7 +223,7 @@ export const ExpenseTracker: React.FC = () => {
         </div>
       </div>
 
-      <div className="table-shell flex-1">
+      <div className="table-shell">
         <table className="w-full table-responsive">
           <thead className="sticky top-0 table-head">
             <tr className="border-b border-ink-100/80">

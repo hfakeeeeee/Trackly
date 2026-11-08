@@ -123,13 +123,14 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen text-ink-900 dark:text-ink-100">
+    <div className="trackly-workspace min-h-screen text-ink-900 dark:text-ink-100">
+      <div className="workspace-canvas">
       <ThemeWipe transitionId={themeTransitionId} />
       <Header />
-      <main className="px-2 pb-16 pt-8 sm:px-4 lg:px-6">
+      <main className="workspace-main">
         <div className="mx-auto max-w-screen-2xl animate-rise-in">
           {/* Row 1: Overview + Financial Overview Chart */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6 animate-rise-in">
+          <div id="overview" className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6 animate-rise-in">
             <div className="lg:col-span-5">
               <Overview />
             </div>
@@ -139,21 +140,21 @@ function AppContent() {
           </div>
 
 
-          {/* Row 2: Income/Debt/Savings (40%) + Bills (60%) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6 animate-rise-in anim-delay-200">
-            <div className="lg:col-span-5 flex h-full flex-col gap-6">
+          {/* Row 2: Equal columns keep financial tables readable. */}
+          <div id="money" className="grid grid-cols-1 xl:grid-cols-12 gap-6 mb-6 animate-rise-in anim-delay-200">
+            <div className="xl:col-span-6 flex h-full flex-col gap-6">
               <Income />
               <Debt />
               <Savings />
             </div>
-            <div className="lg:col-span-7 flex h-full flex-col gap-6">
+            <div id="bills" className="xl:col-span-6 flex h-full flex-col gap-6">
               <Bills />
               <DailyExpenseChart />
             </div>
           </div>
 
           {/* Row 3: Expense Tracker (60%) + Expense Distribution & Category Manager (40%) */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6 animate-rise-in anim-delay-300">
+          <div id="expenses" className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6 animate-rise-in anim-delay-300">
             <div className="lg:col-span-3">
               <ExpenseTracker />
             </div>
@@ -166,6 +167,7 @@ function AppContent() {
       </main>
 
       <Footer />
+      </div>
       <ScrollToTopButton />
     </div>
   );

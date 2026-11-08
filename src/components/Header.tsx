@@ -100,15 +100,15 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="relative overflow-hidden bg-gradient-to-r from-sand-50 via-sand-100 to-sand-50 text-ink-900 shadow-float dark:bg-ink-900 dark:bg-none dark:text-white">
-      <div className="pointer-events-none absolute inset-0">
+    <header className="workspace-header relative text-ink-900 dark:text-white">
+      <div className="header-decoration pointer-events-none absolute inset-0">
         <div className="absolute -top-24 left-10 h-60 w-60 rounded-full bg-teal-400/30 blur-3xl animate-slow-float animate-pulse-glow dark:bg-teal-500/30" />
         <div className="absolute -top-16 right-12 h-72 w-72 rounded-full bg-amber-300/30 blur-3xl animate-slow-float animate-pulse-glow dark:bg-amber-400/30" />
         <div className="absolute -left-1/3 top-10 h-12 w-2/3 rotate-2 bg-gradient-to-r from-transparent via-ink-900/5 to-transparent blur-xl animate-shimmer dark:via-white/15" />
         <div className="absolute -bottom-20 left-1/3 h-40 w-2/3 rounded-full bg-gradient-to-r from-teal-400/20 via-amber-300/20 to-rose-300/20 blur-2xl animate-aurora dark:from-teal-500/20 dark:via-amber-400/20 dark:to-rose-400/20" />
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-sand-100/80 to-transparent dark:from-ink-900/70" />
       </div>
-      <div className="relative px-4 py-6 sm:px-8 sm:py-10 lg:px-10 animate-fade-in">
+      <div className="relative px-4 py-6 sm:px-6 lg:px-8 animate-fade-in">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="pill inline-block bg-ink-900/10 text-ink-700 dark:bg-white/15 dark:text-white">

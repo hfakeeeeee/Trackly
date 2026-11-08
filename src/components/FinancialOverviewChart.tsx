@@ -1,5 +1,5 @@
 import React from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { useApp } from '../AppContext';
 import { t } from '../i18n';
 
@@ -14,10 +14,10 @@ export const FinancialOverviewChart: React.FC = () => {
   const totalExpenses = expenses.reduce((sum, item) => sum + item.amount, 0);
 
   const chartData = [
-    { name: t(language, 'debt'), value: totalDebt, color: '#ef4444' },
-    { name: t(language, 'bills'), value: totalBills, color: '#f59e0b' },
-    { name: t(language, 'savings'), value: totalSavings, color: '#10b981' },
-    { name: t(language, 'expense'), value: totalExpenses, color: '#8b5cf6' },
+    { name: t(language, 'debt'), value: totalDebt, color: 'var(--chart-4)' },
+    { name: t(language, 'bills'), value: totalBills, color: 'var(--chart-3)' },
+    { name: t(language, 'savings'), value: totalSavings, color: 'var(--chart-1)' },
+    { name: t(language, 'expense'), value: totalExpenses, color: 'var(--chart-2)' },
   ].filter((item) => item.value > 0);
 
   const formatCurrency = (value: number) => {
@@ -30,7 +30,7 @@ export const FinancialOverviewChart: React.FC = () => {
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="rounded-xl border border-ink-100/70 bg-white/90 px-4 py-2 text-sm shadow-soft dark:border-ink-800/70 dark:bg-ink-900/80">
+        <div className="chart-tooltip">
           <p className="font-semibold text-ink-900 dark:text-ink-100">{payload[0].name}</p>
           <p className="text-teal-700 font-semibold dark:text-teal-300">{formatCurrency(payload[0].value)}</p>
         </div>
@@ -40,7 +40,7 @@ export const FinancialOverviewChart: React.FC = () => {
   };
 
   return (
-    <section className="card card-pad mb-6 h-full flex flex-col">
+    <section className="card card-pad chart-card h-full flex flex-col">
       <h2 className="section-title font-heading mb-4">{t(language, 'financialOverview')}</h2>
       
       {chartData.length === 0 ? (
@@ -64,56 +64,29 @@ export const FinancialOverviewChart: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="flex flex-1 flex-col">
-          <div className="h-[min(34vh,310px)] min-h-[280px]">
+        <div className="donut-layout">
+          <div className="donut-visual">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
+                <Pie data={chartData} cx="50%" cy="50%" innerRadius="72%" outerRadius="90%"
+                  paddingAngle={chartData.length > 1 ? 4 : 0} cornerRadius={5} stroke="none"
+                  dataKey="value" startAngle={90} endAngle={-270} isAnimationActive={false}>
+                  {chartData.map(entry => <Cell key={entry.name} fill={entry.color} />)}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
-                <Legend />
               </PieChart>
             </ResponsiveContainer>
+            <div className="donut-center"><span>{t(language, 'total')}</span><strong>{formatCurrency(chartData.reduce((sum, entry) => sum + entry.value, 0))}</strong></div>
           </div>
-          
-          {/* Summary Cards */}
-          <div className="mt-auto grid grid-cols-2 gap-3 pt-5">
-            {totalDebt > 0 && (
-              <div className="rounded-xl border border-rose-200/60 bg-rose-50/70 p-2 dark:border-rose-500/30 dark:bg-rose-500/10">
-                <p className="text-xs text-ink-500 dark:text-ink-300">{t(language, 'debt')}</p>
-                <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">{formatCurrency(totalDebt)}</p>
-              </div>
-            )}
-            {totalBills > 0 && (
-              <div className="rounded-xl border border-amber-200/60 bg-amber-50/70 p-2 dark:border-amber-500/30 dark:bg-amber-500/10">
-                <p className="text-xs text-ink-500 dark:text-ink-300">{t(language, 'bills')}</p>
-                <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">{formatCurrency(totalBills)}</p>
-              </div>
-            )}
-            {totalSavings > 0 && (
-              <div className="rounded-xl border border-teal-200/60 bg-teal-50/70 p-2 dark:border-teal-500/30 dark:bg-teal-500/10">
-                <p className="text-xs text-ink-500 dark:text-ink-300">{t(language, 'savings')}</p>
-                <p className="text-sm font-semibold text-teal-700 dark:text-teal-300">{formatCurrency(totalSavings)}</p>
-              </div>
-            )}
-            {totalExpenses > 0 && (
-              <div className="rounded-xl border border-ink-200/60 bg-ink-50/70 p-2 dark:border-ink-700/70 dark:bg-ink-900/70">
-                <p className="text-xs text-ink-500 dark:text-ink-300">{t(language, 'expense')}</p>
-                <p className="text-sm font-semibold text-ink-800 dark:text-ink-100">{formatCurrency(totalExpenses)}</p>
-              </div>
-            )}
+          <div className="chart-breakdown">
+            {chartData.map(entry => {
+              const percent = entry.value / chartData.reduce((sum, item) => sum + item.value, 0) * 100;
+              return <div className="chart-breakdown-row" key={entry.name}>
+                <div className="chart-breakdown-label"><span className="chart-dot" style={{ background: entry.color }} />{entry.name}</div>
+                <div className="chart-breakdown-value"><span>{formatCurrency(entry.value)}</span><small>{percent.toFixed(1)}%</small></div>
+                <div className="chart-track"><span style={{ width: `${percent}%`, background: entry.color }} /></div>
+              </div>;
+            })}
           </div>
         </div>
       )}

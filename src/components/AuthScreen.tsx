@@ -69,9 +69,9 @@ export const AuthScreen: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-ink-950 text-ink-900 dark:text-ink-100">
-      <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
-        <div className="relative hidden overflow-hidden bg-ink-900 text-white lg:flex">
+    <div className="auth-glass-page min-h-screen text-ink-900 dark:text-ink-100">
+      <div className="auth-glass-frame grid min-h-screen grid-cols-1 lg:grid-cols-2">
+        <div className="auth-glass-story relative hidden overflow-hidden text-white lg:flex">
           <div className="absolute inset-0">
             <div className="absolute -left-32 top-10 h-80 w-80 rounded-full bg-teal-400/40 blur-[120px] animate-slow-float" />
             <div className="absolute -bottom-20 right-10 h-72 w-72 rounded-full bg-amber-300/30 blur-[130px] animate-slow-float" />
@@ -92,7 +92,7 @@ export const AuthScreen: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center justify-center bg-sand-50 px-4 py-12 dark:bg-ink-950">
+        <div className="auth-glass-form flex items-center justify-center px-4 py-12">
           <div className="w-full max-w-md animate-rise-in">
             <div className="mb-8 text-center lg:text-left">
               <h1 className="font-heading text-3xl font-semibold text-ink-900 dark:text-ink-100">
